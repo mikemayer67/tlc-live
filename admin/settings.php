@@ -1,10 +1,13 @@
 <?php
-namespace TLC\Livestream\Admin;
+namespace TLC\Live;
+
+require_once TLC_LIVESTREAM_DIR.'/utils/logger.php';
 
 class Settings
 {
   static function init()
   {
+    log_info("Settings::init ");
     add_settings_section(
       'tlc-livestream-settings-section',
       'YouTube',
@@ -25,6 +28,7 @@ class Settings
 
   static function menu()
   {
+    log_info("Settings::menu ");
     add_options_page(
       'TLC Livestream Settings',
       'TLC Livestream',
@@ -37,6 +41,7 @@ class Settings
 
 function populate_settings_page()
 {
+    log_info("populate_settings_page ");
 ?>
 <div class="wrap">
   <h1>

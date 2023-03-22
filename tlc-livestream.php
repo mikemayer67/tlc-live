@@ -13,32 +13,14 @@
 
 define('TLC_LIVESTREAM_DIR',plugin_dir_path(__FILE__));
 
-require_once 'utils/logger.php';
 require_once 'admin/settings.php';
+require_once 'admin/maintenance.php';
 
-function do_activate()
-{
-  TLC\log_info("activate");
-  TLC\log_warning("activate");
-  TLC\log_error("activate");
-}
+register_activation_hook(   __FILE__, 'TLC\Live\handle_activate' );
+register_deactivation_hook( __FILE__, 'TLC\Live\handle_deactivate');
+register_uninstall_hook(    __FILE__, 'TLC\Live\handle_uninstall');
 
-function do_deactivate()
-{
-  TLC\log_info("deactivate");
-  TLC\log_warning("deactivate");
-  TLC\log_error("deactivate");
-}
-
-function do_uninstall()
-{
-}
-
-register_activation_hook(   __FILE__, 'do_activate' );
-register_deactivation_hook( __FILE__, 'do_deactivate');
-register_uninstall_hook(    __FILE__, 'do_uninstall');
-
-add_action('admin_menu',['TLC\Livestream\Admin\Settings','menu']);
-#add_action('admin_init','TLC\Livestream\Admin\settings_init');
+add_action('admin_menu',['TLC\Live\Settings','menu']);
+#add_action('admin_init','TLC\Live\Settings','init']);
 
 

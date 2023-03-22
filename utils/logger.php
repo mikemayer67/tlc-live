@@ -1,5 +1,5 @@
 <?php
-namespace TLC;
+namespace TLC\Live;
 
 class Logger
 {

@@ -11,16 +11,24 @@
  * License URL: https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+if( ! defined('WPINC') ) {
+  die;
+}
+
 define('TLC_LIVESTREAM_DIR',plugin_dir_path(__FILE__));
 
 require_once 'admin/settings.php';
 require_once 'admin/maintenance.php';
+require_once 'public/shortcode.php';
+
+require_once __DIR__ . '/vendor/autoload.php';
 
 register_activation_hook(   __FILE__, 'TLC\Live\handle_activate' );
 register_deactivation_hook( __FILE__, 'TLC\Live\handle_deactivate');
 register_uninstall_hook(    __FILE__, 'TLC\Live\handle_uninstall');
 
-add_action('admin_menu',['TLC\Live\Settings','menu']);
-#add_action('admin_init','TLC\Live\Settings','init']);
+add_action('admin_menu','TLC\Live\Settings\handle_admin_menu');
+add_action('admin_init','TLC\Live\Settings\handle_admin_init');
 
+add_shortcode('tlc-livestream','TLC\Live\Public\handle_shortcode');
 

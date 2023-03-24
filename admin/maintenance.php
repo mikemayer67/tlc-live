@@ -15,6 +15,8 @@ function handle_deactivate()
 
 function handle_uninstall()
 {
-  delete_option('tlc_livestream_activate');
-  delete_option('tlc_livestream_deactivate');
+  delete_option(TLC\Live\Settings\YOUTUBE_API_KEY);
+  delete_option(TLC\Live\Settings\YOUTUBE_CLIENT_ID);
+  delete_option(TLC\Live\Settings\YOUTUBE_CLIENT_SECRET);
+  delete_option(TLC\Live\Settings\TIMING_SWITCH);
 }

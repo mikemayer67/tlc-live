@@ -20,7 +20,7 @@ function handle_init()
   log_info("Settings::handle_init ");
   wp_register_script(
     'tlc_livestream_test_script',
-    TLC_LIVESTREAM_URL.'/js/livestream_test.js',
+    TLC_LIVESTREAM_URL.'/js/tlc_livestream_test.js',
     array('jquery')
   );
 
@@ -34,6 +34,11 @@ function handle_init()
 
   wp_enqueue_script('jquery');
   wp_enqueue_script('tlc_livestream_test_script');
+  
+  wp_enqueue_style(
+    'tlc_livestream_style',
+    TLC_LIVESTREAM_URL.'/css/tlc_livestream.css',
+  );
 }
 
 function handle_admin_init()
@@ -112,9 +117,9 @@ class Populate
   {
     echo "<div style='font-weight:bold;'>";
     echo "  Enter the time to switch to upcoming livestream using the format '#d #h #m #s'.";
-    echo "</div><div styel='padding-left:1em;'>";
+    echo "</div><div class=tlc-livestream-settings-comment-2>";
     echo "  - You do not need to specify all elements, but they must be specified in the order shown.";
-    echo "</div><div styel='padding-left:1em;'>";
+    echo "</div><div class=tlc-livestream-settings-comment-2>";
     echo "  - If left blank, the switch will occur at the scheduled start time.";
     echo "</div>";
 }
@@ -124,6 +129,16 @@ class Populate
     $title = esc_html(get_admin_page_title());
     echo "<div class='wrap'>";
     echo "<h1>$title</h1>";
+    echo "<h2>Settings Test</h2>";
+    echo "<div>Running the settings test will verify that the connection settings to YouTube are set correctly.";
+    echo "</div><div class=tlc-livestream-settings-comment-2>";
+    echo "- Note that this test will count against your daily YouTube API quota.";
+    echo "</div><div class=tlc-livestream-settings-comment-2>";
+    echo "- As this only costs 1 quota point, you should be ok... but you've been warned.";
+    echo "</div>";
+
+    echo "<textarea id=youtube_test_result>Nothing to see here</textarea>";
+
     echo "<form action='options.php' method='post'>";
     settings_fields(SETTINGS_PAGE);
     do_settings_sections(SETTINGS_PAGE);
@@ -163,7 +178,6 @@ class Populate
 
     $key = 'HTTP_X_REQUESTED_WITH';
     $http_x_request_with = array_key_exists($key,$_SERVER) ? $_SERVER[$key] : "";
-    log_info("http_x_request_with: $http_x_request_with");
     if(strtolower($http_x_request_with) == 'xmlhttprequest') {
       echo json_encode($result);
     } else {

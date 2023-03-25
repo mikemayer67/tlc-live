@@ -16,6 +16,7 @@ if( ! defined('WPINC') ) {
 }
 
 define('TLC_LIVESTREAM_DIR',plugin_dir_path(__FILE__));
+define('TLC_LIVESTREAM_URL',plugin_dir_url(__FILE__));
 
 require_once 'admin/settings.php';
 require_once 'admin/maintenance.php';
@@ -27,8 +28,11 @@ register_activation_hook(   __FILE__, 'TLC\Live\handle_activate' );
 register_deactivation_hook( __FILE__, 'TLC\Live\handle_deactivate');
 register_uninstall_hook(    __FILE__, 'TLC\Live\handle_uninstall');
 
-add_action('admin_menu','TLC\Live\Settings\handle_admin_menu');
-add_action('admin_init','TLC\Live\Settings\handle_admin_init');
+if( is_admin() ) {
+  add_action('admin_menu','TLC\Live\Settings\handle_admin_menu');
+  add_action('admin_init','TLC\Live\Settings\handle_admin_init');
+  add_action('init','TLC\Live\Settings\handle_init');
+}
 
 add_shortcode('tlc-livestream','TLC\Live\Public\handle_shortcode');
 

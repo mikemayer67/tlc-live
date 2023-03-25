@@ -13,9 +13,32 @@ const YOUTUBE_CLIENT_ID = 'tlc_livestream_youtube_client_id';
 const YOUTUBE_CLIENT_SECRET = 'tlc_livestream_youtube_client_secret';
 const TIMING_SWITCH = 'tlc_livestream_swith_to_upcoming';
 
+const AJAX_HANDLE = 'tlc_livestream_test';
+
+function handle_init()
+{
+  log_info("Settings::handle_init ");
+  wp_register_script(
+    'tlc_livestream_test_script',
+    TLC_LIVESTREAM_URL.'/js/livestream_test.js',
+    array('jquery')
+  );
+
+  wp_localize_script(
+    'tlc_livestream_test_script',
+    'myAjax',
+    [
+      'ajaxurl' => admin_url('admin-ajax.php')
+    ],
+  );
+
+  wp_enqueue_script('jquery');
+  wp_enqueue_script('tlc_livestream_test_script');
+}
+
 function handle_admin_init()
 {
-  log_info("Settings::init ");
+  log_info("Settings::handle_admin_init ");
   add_settings_section(
     YOUTUBE_SECTION,
     'YouTube',
@@ -35,11 +58,13 @@ function handle_admin_init()
   register_and_add_setting('Client Secret',YOUTUBE_CLIENT_SECRET,YOUTUBE_SECTION);
 
   register_and_add_setting('Switch to Upcoming Livestream', TIMING_SWITCH, TIMING_SECTION);
+
+  add_action('wp_ajax_'.AJAX_HANDLE,[__NAMESPACE__.'\\Populate','update_test_result']);
 }
 
 function handle_admin_menu()
 {
-  log_info("Settings::menu ");
+  log_info("Settings::handle_admin_menu ");
   add_options_page(
     'TLC Livestream Settings',
     'TLC Livestream',
@@ -85,16 +110,13 @@ class Populate
 
   public static function timing_section()
   {
-?>
-<div style="font-weight:bold;">
-Enter the time to switch to upcoming livestream using the format '#d #h #m #s'.
-</div><div styel="padding-left:1em;">
-- You do not need to specify all elements, but they must be specified in the
-order shown.  
-</div><div styel="padding-left:1em;">
-- If left blank, the switch will occur at the scheduled start time.
-</div>
-<?php
+    echo "<div style='font-weight:bold;'>";
+    echo "  Enter the time to switch to upcoming livestream using the format '#d #h #m #s'.";
+    echo "</div><div styel='padding-left:1em;'>";
+    echo "  - You do not need to specify all elements, but they must be specified in the order shown.";
+    echo "</div><div styel='padding-left:1em;'>";
+    echo "  - If left blank, the switch will occur at the scheduled start time.";
+    echo "</div>";
 }
 
   public static function settings_page()
@@ -107,6 +129,48 @@ order shown.
     do_settings_sections(SETTINGS_PAGE);
     submit_button('Save Settings');
     echo "</form></div>";
+
+    $ajax_runs = get_option('tlc_livestream_ajax_test',0);
+    echo "<b>You have run the AJAX test <span id=ajax_run_count>$ajax_runs</span> times.</b>";
+    $action = AJAX_HANDLE;
+    $nonce = wp_create_nonce(AJAX_HANDLE);
+    $link = admin_url("admin-ajax.php?action=$action&nonce=$nonce");
+    echo "<div><a class='ajax_count' data-nonce='$nonce' href='$link'>run AJAX test</a></div>";
+  }
+
+  public static function update_test_result()
+  {
+    log_info("Update_test_result: ".json_encode($_REQUEST));
+
+    if(!wp_verify_nonce($_REQUEST['nonce'],AJAX_HANDLE)) {
+      log_info("Bad nonce");
+      exit("Bad nonce");
+    }
+
+    $cur_count = get_option('tlc_livestream_ajax_test',0);
+    $new_count = $cur_count + 1;
+    if(update_option('tlc_livestream_ajax_test',$new_count)) {
+      $result = [
+        'type' => 'success',
+        'count' => $new_count,
+      ];
+    } else {
+      $result = [
+        'type' => 'error',
+        'count' => $cur_count,
+      ];
+    }
+
+    $key = 'HTTP_X_REQUESTED_WITH';
+    $http_x_request_with = array_key_exists($key,$_SERVER) ? $_SERVER[$key] : "";
+    log_info("http_x_request_with: $http_x_request_with");
+    if(strtolower($http_x_request_with) == 'xmlhttprequest') {
+      echo json_encode($result);
+    } else {
+      header("Location: ".$_SERVER['HTTP_REFERER']);
+    }
+
+    die();
   }
 }
 

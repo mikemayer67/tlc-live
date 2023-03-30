@@ -1,4 +1,0 @@
-[24-Mar-2023 22:31:37 UTC] PHP Fatal error:  Uncaught Error: Undefined constant "TLC_LIVESTREAM_DIR" in /home3/vmwishes/public_html/wp-content/plugins/tlc-livestream/public/youtube.php:3
-Stack trace:
-#0 {main}
-  thrown in /home3/vmwishes/public_html/wp-content/plugins/tlc-livestream/public/youtube.php on line 3

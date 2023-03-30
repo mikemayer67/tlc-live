@@ -7,8 +7,8 @@ jQuery(document).ready( function() {
       jQuery.ajax({
          type : "post",
          dataType : "json",
-         url : myAjax.ajaxurl,
-         data : {action: "tlc_livestream_test", nonce: nonce},
+         url : tlcAjax.ajaxurl,
+         data : {action: "tlc-livestream-test", has_js:true, nonce: nonce},
          success: function(response) {
             if(response.type == "success") {
                jQuery("#ajax_run_count").html(response.count)

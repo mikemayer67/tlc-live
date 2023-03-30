@@ -1,7 +1,5 @@
 <?php
-namespace TLC\Live\Public;
-
-require_once('youtube.php');
+namespace TLC\Live;
 
 function handle_shortcode($attr,$content=null)
 {
@@ -13,11 +11,6 @@ function handle_shortcode($attr,$content=null)
   );
   $attr_json = json_encode($attr);
 
-  $content = youtube_html();
+  return "<b>YouTube Frame will go here</b><div>For now: $attr_json</div>";
 
-  if($content == null) {
-    return youtube_connection_error_html();
-  }
-
-  return $content;
 }

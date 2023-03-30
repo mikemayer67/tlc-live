@@ -29,9 +29,9 @@ register_deactivation_hook( __FILE__, 'TLC\Live\handle_deactivate');
 register_uninstall_hook(    __FILE__, 'TLC\Live\handle_uninstall');
 
 if( is_admin() ) {
-  add_action('admin_menu','TLC\Live\Settings\handle_admin_menu');
-  add_action('admin_init','TLC\Live\Settings\handle_admin_init');
-  add_action('init','TLC\Live\Settings\handle_init');
+  add_action('admin_menu','TLC\Live\handle_admin_menu');
+  add_action('admin_init','TLC\Live\handle_admin_init');
+  add_action('init','TLC\Live\handle_init');
 }
 
 add_shortcode('tlc-livestream','TLC\Live\Public\handle_shortcode');

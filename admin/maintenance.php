@@ -1,11 +1,13 @@
 <?php
 namespace TLC\Live;
 
-require_once TLC_LIVESTREAM_DIR.'/utils/logger.php';
+require_once TLC_LIVESTREAM_DIR.'/include/logger.php';
+require_once TLC_LIVESTREAM_DIR.'/admin/settings.php';
 
 function handle_activate()
 {
-  log_info("activate ");
+  log_info("activate");
+  fill_default_settings();
 }
 
 function handle_deactivate()
@@ -15,8 +17,5 @@ function handle_deactivate()
 
 function handle_uninstall()
 {
-  delete_option(TLC\Live\Settings\YOUTUBE_API_KEY);
-  delete_option(TLC\Live\Settings\YOUTUBE_CLIENT_ID);
-  delete_option(TLC\Live\Settings\YOUTUBE_CLIENT_SECRET);
-  delete_option(TLC\Live\Settings\TIMING_SWITCH);
+  clear_all_settings();
 }

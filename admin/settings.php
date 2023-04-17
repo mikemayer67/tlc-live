@@ -1,54 +1,37 @@
 <?php
 namespace TLC\Live;
 
-require_once TLC_LIVESTREAM_DIR.'/include/logger.php';
+require_once TLC_LIVESTREAM_DIR.'/include/connection.php';
 require_once TLC_LIVESTREAM_DIR.'/include/javascript.php';
-require_once TLC_LIVESTREAM_DIR.'/include/timing.php';
+require_once TLC_LIVESTREAM_DIR.'/include/logger.php';
 require_once TLC_LIVESTREAM_DIR.'/include/style.php';
+require_once TLC_LIVESTREAM_DIR.'/include/timing.php';
 
-const SETTINGS_PAGE   = 'tlc-livestream-settings-page';
-const YOUTUBE_SECTION = 'tlc-livestream-youtube-section';
-const TIMING_SECTION  = 'tlc-livestream-timing-section';
+const SETTINGS_PAGE   = 'tlc-live-settings-page';
+const YOUTUBE_SECTION = 'tlc-live-youtube-section';
+const TIMING_SECTION  = 'tlc-live-timing-section';
 
-const YOUTUBE_API_KEY = 'tlc_livestream_youtube_api_key';
-const YOUTUBE_CLIENT_ID = 'tlc_livestream_youtube_client_id';
-const YOUTUBE_CLIENT_SECRET = 'tlc_livestream_youtube_client_secret';
-
-const TIMING_SWITCH = 'tlc_livestream_swith_to_upcoming';
-const TIMING_POLL_START = 'tlc_livestream_poll_start';
-const TIMING_POLL_FREQ = 'tlc_livestream_poll_freq';
-
-const DEFAULT_TIMING_SWITCH = '30m';
-const DEFAULT_TIMING_POLL_START = '5m';
-const DEFAULT_TIMING_POLL_FREQ = '10s';
-
-const TEST_ACTION = 'tlc_livestream_test';
-
-const AJAX_HANDLE = 'tlc-livestream-test';
+const AJAX_HANDLE = 'tlc-live-test';
 
 function fill_default_settings()
 {
-  update_option(TIMING_SWITCH,    get_option(TIMING_SWITCH,    DEFAULT_TIMING_SWITCH));
-  update_option(TIMING_POLL_START,get_option(TIMING_POLL_START,DEFAULT_TIMING_POLL_START));
-  update_option(TIMING_POLL_FREQ, get_option(TIMING_POLL_FREQ, DEFAULT_TIMING_POLL_FREQ));
+  fill_connection_defaults();
+  fill_timing_defaults();
 }
 
 function clear_all_settings()
 {
-  delete_option(YOUTUBE_API_KEY);
-  delete_option(YOUTUBE_CLIENT_ID);
-  delete_option(YOUTUBE_CLIENT_SECRET);
-  delete_option(TIMING_SWITCH);
-  delete_option(TIMING_POLL_START);
-  delete_option(TIMING_POLL_FREQ);
+  clear_connection_settings();
+  clear_timing_settings();
 }
 
 function handle_init()
 {
   log_info("Settings::handle_init ");
-
-  add_javascript('tlc-livestream-test');
   add_css('tlc-livestream');
+
+  # TODO: delete this
+  add_javascript('tlc-live-test');
 }
 
 function handle_admin_init()
@@ -56,19 +39,21 @@ function handle_admin_init()
   log_info("Settings::handle_admin_init ");
 
   setup_section(YOUTUBE_SECTION, 'YouTube API Keys');
-  setup_section(TIMING_SECTION,  'Livestream Display');
+  setup_section(TIMING_SECTION,  'Livestream Updates');
 
   register_and_add_setting('API Key',      YOUTUBE_API_KEY,      YOUTUBE_SECTION);
   register_and_add_setting('Client ID',    YOUTUBE_CLIENT_ID,    YOUTUBE_SECTION);
   register_and_add_setting('Client Secret',YOUTUBE_CLIENT_SECRET,YOUTUBE_SECTION);
 
+  register_and_add_setting('Refresh Schedule', SCHEDULE_UPDATE, TIMING_SECTION);
   register_and_add_setting('Switch to Upcoming', TIMING_SWITCH, TIMING_SECTION);
   register_and_add_setting('Start Polling', TIMING_POLL_START, TIMING_SECTION);
   register_and_add_setting('Polling Frequency', TIMING_POLL_FREQ, TIMING_SECTION);
 
-  add_action('admin_post_'.TEST_ACTION, [__NAMESPACE__.'\\Populate','handle_connection_test']);
-  #@@@TODO: Remove the following
-  add_action('wp_ajax_'.AJAX_HANDLE,[__NAMESPACE__.'\\Populate','update_test_result']);
+  add_action('admin_post_'.CONNECTION_TEST, ns('handle_connection_test'));
+
+  # TODO: delete this
+  add_action('wp_ajax_'.AJAX_HANDLE,[ns('Populate'),'update_test_result']);
 }
 
 function handle_admin_menu()
@@ -79,7 +64,7 @@ function handle_admin_menu()
     'TLC Livestream',
     'manage_options',
     SETTINGS_PAGE,
-    [__NAMESPACE__.'\\Populate','settings_page'],
+    [ns('Populate'),'settings_page'],
   );
 }
 
@@ -89,7 +74,7 @@ function setup_section($section, $label)
   add_settings_section(
     $section,
     $label,
-    [__NAMESPACE__.'\\Populate',$section],
+    [ns('Populate'),$section],
     SETTINGS_PAGE,
   );
 }
@@ -108,7 +93,7 @@ function register_and_add_setting($label,$setting,$section)
   add_settings_field(
     $setting,
     $label,
-    [__NAMESPACE__.'\\Populate',$setting],
+    [ns('Populate'),$setting],
     SETTINGS_PAGE,
     $section,
   );
@@ -135,6 +120,15 @@ class Populate
       echo "You will need to get the following info from the ";
       echo "<a href='https://console.cloud.google.com'>Google Cloud console</a>.";
       echo "</div>";
+      break;
+
+    case SCHEDULE_UPDATE:
+      self::text_input(
+        $name,
+        "Minimum time between querying YouTube for livestream schedule updates",
+        "\s*(\d+d)?\s*(\d+h)?\s*(\d+m)?\s*",
+        "[#d][#h][#m][#s]",
+      );
       break;
 
     case TIMING_SWITCH:
@@ -172,7 +166,6 @@ class Populate
     }
   }
 
-
   public static function text_input($name,$info="",$pattern="",$hint="")
   {
     $value = esc_attr(get_option($name,""));
@@ -191,7 +184,6 @@ class Populate
     }
   }
 
-
   public static function settings_page()
   {
     $title = esc_html(get_admin_page_title());
@@ -209,14 +201,14 @@ class Populate
     submit_button('Save Settings');
     echo "</form>";
 
-    # @@@TODO : Remove the following
+    # TODO : Remove the following
     $timing = json_encode(timing_settings());
     echo "<div>$timing</div>";
 
-    # @@@TODO : Remove the following
+    # @@TODO : Remove the following
     echo "<hr>";
     echo "<div style='margin-left:100px;'>";
-    $ajax_runs = get_option('tlc_livestream_ajax_test',0);
+    $ajax_runs = get_option('tlc_live_ajax_test',0);
     echo "<b>You have run the AJAX test <span id=ajax_run_count>$ajax_runs</span> times.</b>";
     $action = AJAX_HANDLE;
     $nonce = wp_create_nonce(AJAX_HANDLE);
@@ -227,13 +219,12 @@ class Populate
 
   public static function settings_test()
   {
-    #$link = TLC_LIVESTREAM_URL."/admin/test_connection.php";
     $link = esc_url(admin_url('admin-post.php'));
-    $nonce = wp_create_nonce(TEST_ACTION);
-    $action = TEST_ACTION;
+    $nonce = wp_create_nonce(CONNECTION_TEST);
+    $action = CONNECTION_TEST;
 
     echo "<form action='$link' method='post'>";
-    echo "<input type='hidden' name='nonce' value='$nonce'>";
+    #echo "<input type='hidden' name='nonce' value='$nonce'>";
     echo "<input type='hidden' name='action' value='$action'>";
     echo "<table class='form-table' role='presentation'>";
     echo "<tr><th scope='row'>Test Connection</th>";
@@ -246,39 +237,7 @@ class Populate
     echo "</form>";
   }
 
-  public static function handle_connection_test()
-  {
-    log_info("handle_connection_test: ".json_encode($_REQUEST));
-    $api_key = get_option(YOUTUBE_API_KEY,"");
-    $client_id = get_option(YOUTUBE_CLIENT_ID,"");
-    $client_secret = get_option(YOUTUBE_CLIENT_SECRET,"");
-    $referer_url = $_SERVER['HTTP_REFERER'];
-
-    echo "<div style='font-family:sans-serif;'>";
-    echo "<h1>TLC Livestream Plugin</h1>";
-    echo "<h2>Connection Test</h2>";
-    echo "<table>";
-    echo "<tr><th>API Key</th><td>$api_key</td></tr>";
-    echo "<tr><th>Client ID</th><td>$client_id</td></tr>";
-    echo "<tr><th>Client Secret</th><td>$client_secret</td></tr>";
-    echo "<tr><th></th><td>";
-    echo "<div style='font-size:large;font-weight:bold;padding-top:30px'>";
-    echo "<a href='$referer_url'>Return to settings page</a></h2>";
-    echo "</div></td>";
-    echo "</tr></table>";
-    echo "</div>";
-    
-    #$test_schedule = [['stream1'=>'test1'],['stream2'=>'test2']];
-    #update_option('tlc_livestream_connection_status',True);
-    #update_option('tlc_livestream_connection_error','just a test error');
-    #update_option('tlc_livestream_stream_schedule',json_encode($test_schedule));
-    #$url = $_SERVER['HTTP_REFERER'];
-    #wp_redirect($url);
-    #exit;
-    #("Location: $url");
-  }
-
-  # @@@TODO delete this
+  # @@TODO delete this
   public static function update_test_result()
   {
     log_info("Update_test_result: ".json_encode($_REQUEST));
@@ -288,9 +247,9 @@ class Populate
       exit("Bad nonce");
     }
 
-    $cur_count = get_option('tlc_livestream_ajax_test',0);
+    $cur_count = get_option('tlc_live_ajax_test',0);
     $new_count = $cur_count + 1;
-    if(update_option('tlc_livestream_ajax_test',$new_count)) {
+    if(update_option('tlc_live_ajax_test',$new_count)) {
       $result = [
         'type' => 'success',
         'count' => $new_count,

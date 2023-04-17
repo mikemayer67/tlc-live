@@ -1,4 +1,5 @@
 <?php
+namespace TLC\Live;
 
 /**
  * Plugin Name: TLC Livestream
@@ -15,6 +16,11 @@ if( ! defined('WPINC') ) {
   die;
 }
 
+function ns($s)
+{
+  return __NAMESPACE__.'\\'.$s;
+}
+
 define('TLC_LIVESTREAM_DIR',plugin_dir_path(__FILE__));
 define('TLC_LIVESTREAM_URL',plugin_dir_url(__FILE__));
 
@@ -24,15 +30,15 @@ require_once 'public/shortcode.php';
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-register_activation_hook(   __FILE__, 'TLC\Live\handle_activate' );
-register_deactivation_hook( __FILE__, 'TLC\Live\handle_deactivate');
-register_uninstall_hook(    __FILE__, 'TLC\Live\handle_uninstall');
+register_activation_hook(   __FILE__, ns('handle_activate') );
+register_deactivation_hook( __FILE__, ns('handle_deactivate') );
+register_uninstall_hook(    __FILE__, ns('handle_uninstall') );
 
 if( is_admin() ) {
-  add_action('admin_menu','TLC\Live\handle_admin_menu');
-  add_action('admin_init','TLC\Live\handle_admin_init');
-  add_action('init','TLC\Live\handle_init');
+  add_action('admin_menu', ns('handle_admin_menu'));
+  add_action('admin_init', ns('handle_admin_init'));
+  add_action('init',       ns('handle_init'));
 }
 
-add_shortcode('tlc-livestream','TLC\Live\Public\handle_shortcode');
+add_shortcode('tlc-livestream', ns('handle_shortcode'));
 

@@ -47,6 +47,17 @@ function tlc_plugin_file()
   return __FILE__;
 }
 
+/**
+ * return url to a plugin resource
+ * 
+ * @param path relative to plugin directory
+ * @return string url to plugin resource
+ */
+function tlc_plugin_url($rel_path)
+{
+  return plugin_dir_url(__FILE__).'/'.$rel_path;
+}
+
 require_once tlc_plugin_path('logger.php');
 require_once tlc_plugin_path('settings.php');
 
@@ -57,7 +68,7 @@ require_once tlc_plugin_path('settings.php');
 function handle_activate()
 {
   log_info('activate: '.__NAMESPACE__);
-  Settings::activate();
+  
 }
 
 function handle_deactivate()
@@ -73,7 +84,6 @@ function handle_uninstall()
 register_activation_hook(   tlc_plugin_file(), ns('handle_activate') );
 register_deactivation_hook( tlc_plugin_file(), ns('handle_deactivate') );
 register_uninstall_hook(    tlc_plugin_file(), ns('handle_uninstall') );
-
 
 /**
  * admin setup

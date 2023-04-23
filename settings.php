@@ -21,16 +21,28 @@ if( ! defined('WPINC') ) { die; }
 
 const OPTIONS_KEY = 'tlc_livestream_options';
 
-const MIN_UPDATE_FREQ = 'min_update_freq';
-const SWITCH_TO_UPCOMING = 'switch_to_upcoming';
-const START_POLLING = 'start_polling';
-const POLL_FREQ = 'poll_freq';
+const API_KEY = 'api_key';
+const CHANNEL_ID = 'channel';
+const PLAYLIST_ID = 'playlist';
+const AUTOPLAY = 'autoplay';
+const CONTROLS = 'controls';
+const ENABLE_KB = 'enablekb';
+const FULL_SCREEN = 'fullscreen';
+const MODEST_BRANDING = 'modestbranding';
+const TRANSITION = 'transition';
+const QUERY_FREQ = 'query_freq';
 
 const OPTION_DEFAULTS = [
-  MIN_UPDATE_FREQ => 300,
-  SWITCH_TO_UPCOMING => 1800,
-  START_POLLING => 300,
-  POLL_FREQ => 10,
+  API_KEY => '',
+  CHANNEL_ID => '',
+  PLAYLIST_ID => '',
+  AUTOPLAY => true,
+  CONTROLS => true,
+  ENABLE_KB => true,
+  FULL_SCREEN => true,
+  QUERY_FREQ => 300,
+  MODEST_BRANDING => true,
+  TRANSITION => 1800,
 ];
 
 class Settings
@@ -44,7 +56,7 @@ class Settings
    * values dictionary
    */
 
-  private $_values = OPTION_DEFAULTS;
+  private $_values = array();
 
   /**
    * return singleton instanceo
@@ -64,8 +76,11 @@ class Settings
   private function __construct() {
     $options = get_option(OPTIONS_KEY,null);
     if( isset($options) ) {
-      $options = json_decode($options);
-      $this->_values = array_replace($this->_values, $options);
+      try {
+        $this->_values = array_replace($this->_values, $options);
+      } catch (TypeError $e) {
+      } catch (Exception $e) {
+      }
     }
     log_info("Settings:: $this");
   }
@@ -78,9 +93,8 @@ class Settings
    * @param string $name option name to retrieve
    * @return string or null
    */
-  public function __get($name) {
-    log_info("Settings::get($name)");
-    return $this->_values[$name] ?? null;
+  public function get($name) {
+    return $this->_values[$name] ?? (OPTION_DEFAULTS[$name] ?? null);
   }
 
   /**
@@ -91,10 +105,10 @@ class Settings
    * @param string $name option name to set
    * @param mixed $value option value to set
    */
-  public function __set($name,$value) {
+  public function set($name,$value) {
     if( ! is_admin() ) { return; }
     $this->_values[$name] = $value;
-    update_option(OPTIONS_KEY,json_encode($this->_values));
+    update_option(OPTIONS_KEY,$this->_values);
   }
 
   /**
@@ -122,23 +136,13 @@ class Settings
   function reset($name=null) {
     if( ! is_admin() ) { return; }
 
-    log_info("Settings::reset($name)");
-
     if( empty($name) ) {
-      $this->_vaues = OPTION_DEFAULTS;
+      $this->_vaues = array();
     } else {
-      $default = OPTION_DEFAULTS[$name] ?? null;
-      if( isset($default) ) 
-      {
-        $this->_values[$name] = $default;
-      } 
-      elseif( isset($this->_values[$name]) ) 
-      {
-        unset($this->_values[$name]);
-      }
+      unset($this->_values[$name]);
     }
 
-    update_option(OPTIONS_KEY,json_encode($this->_values));
+    update_option(OPTIONS_KEY,$this->_values);
   }
 
   /**

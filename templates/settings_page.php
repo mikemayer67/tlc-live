@@ -1,5 +1,14 @@
+<?php
+namespace TLC\Live;
+?>
+
 <div class="wrap">
-  <h1><?=$title?></h1>
+  <h1>
+    <?=$title?>
+<?php if( $updated ) { ?>
+      <span class='tlc-status'>updated</span>
+<?php }; ?>
+  </h1>
   <form id='tlc-livestream-settings' class='tlc' method="POST">
     <input type="hidden" name="action" value="update">
     <?=$nonce?>
@@ -11,7 +20,7 @@
         via the <a href='https://console.cloud.google.com'>Google Cloud console</a>.
       </div>
       <div class=input>
-        <input type="text" class=tlc name="api_key" value="<?=$api_key?>" pattern='^[a-zA-Z0-9]*$'>
+        <input type="text" class=tlc name=<?=API_KEY?> value="<?=$api_key?>" pattern='^[a-zA-Z0-9]*$'>
       </div>
       <div class=label>Channel ID</div>
       <div class=info>
@@ -21,7 +30,7 @@
         <a href='https://youtube.com/account_advanced'>advanced YouTube account settings</a>.
       </div>
       <div class=input>
-        <input type="text" name="channel" value="<?=$channel?>" pattern='^[a-zA-Z0-9]*$'>
+        <input type="text" name=<?=CHANNEL_ID?> value="<?=$channel?>" pattern='^[a-zA-Z0-9]*$'>
       </div>
       <div class=label>Playlist ID</div>
       <div id='tlc-playlist-info' class=info>
@@ -36,7 +45,7 @@
         </ul>
       </div>
       <div class=input>
-        <td><input type="text" name="playlist" value="<?=$playlist?>" pattern='^[a-zA-Z0-9]*$'></td>
+        <td><input type="text" name=<?=PLAYLIST_ID?> value="<?=$playlist?>" pattern='^[a-zA-Z0-9]*$'></td>
       </div>
       <div class=label>Transition To Upcoming Livestream</div>
       <div class=info>
@@ -46,11 +55,11 @@
         at the scheduled start time.
       </div>
       <div class=input>
-        <input type='text' class='tls-time' name='switch_d' value="<?=$switch_d?>" pattern='^\s*\d*\s*$'>
+        <input type='text' class='tls-time' name='transition_d' value="<?=$transition_d?>" pattern='^\s*\d*\s*$'>
         days
-        <input type='text' class='tls-time' name='switch_h' value="<?=$switch_h?>" pattern='^\s*\d*\s*$'>
+        <input type='text' class='tls-time' name='transition_h' value="<?=$transition_h?>" pattern='^\s*\d*\s*$'>
         hours
-        <input type='text' class='tls-time' name='switch_m' value="<?=$switch_m?>" pattern='^\s*\d*\s*$'>
+        <input type='text' class='tls-time' name='transition_m' value="<?=$transition_m?>" pattern='^\s*\d*\s*$'>
         minutes
       </div>
       <div class=label>Embedded Livestream Options</div>
@@ -63,7 +72,7 @@
       <div class=input>
         <ul>
           <li>
-            <input type=checkbox name=autoplay value=1 <?= $autoplay?'checked':''?>>
+            <input type=checkbox name=<?=AUTOPLAY?> value=1 <?= $autoplay?'checked':''?>>
             <span class=input-label>autoplay</span>
             <span class=input-info>
               playback will occur without any user interaction with the player
@@ -71,22 +80,22 @@
             </input>
           </li>
           <li>
-            <input type=checkbox name=controls value=1 <?= $controls?'checked':''?>>
+            <input type=checkbox name=<?=CONTROLS?> value=1 <?= $controls?'checked':''?>>
             <span class=input-label>controls</span>
             <span class=input-info>
               playback controls are displayed in the player
             </input>
           </li>
           <li>
-            <input type=checkbox name=disablekb value=1 <?= $disablekb?'checked':''?>>
-            <span class=input-label>disable keyboard</span>
+            <input type=checkbox name=<?=ENABLE_KB?> value=1 <?= $enablekb?'checked':''?>>
+            <span class=input-label>enable keyboard</span>
             <span class=input-info>
-              control of playback using the keyboard is disabled
+              keyboard can be used to control playback
             </span>
             </input>
           </li>
           <li>
-            <input type=checkbox id=fs name=fs value=1 <?= $fs?'checked':''?>>
+            <input type=checkbox name=<?=FULL_SCREEN?> value=1 <?= $fullscreen?'checked':''?>>
             <span class=input-label>full screen</span>
             <span class=input-info>
               allow the user to display the livestream full screen
@@ -94,7 +103,7 @@
             </input>
           </li>
           <li>
-            <input type=checkbox  name=modestbranding value=1 <?=$modestbranding?'checked':''?>>
+            <input type=checkbox  name=<?=MODEST_BRANDING?> value=1 <?=$modestbranding?'checked':''?>>
             <span class=input-label>modest branding</span>
             <span class=input-info>
               suppress the YouTube logo from the livestream unless paused
@@ -108,10 +117,10 @@
         YouTube API queries are subject to a quota system, allowing only so many queries per day.
         If you are using the API key specified above for more than just this plugin, you may wish
         to reduce the query frequency to avoid hitting quota limitations.  Otherwise, the default
-        limit of no more than 1 query per minute should be quite sufficient to avoid quota issues.
+        limit of no more than one query every 5 minutes should be sufficient to avoid quota issues.
       </div>
       <div class=input>
-        <input type='text' class='tls-time' name='query_freq_m' value="<?=$query_freq_m?>" pattern='^\s*\d*\s*$'>
+        <input type='text' class='tls-time' name=<?=QUERY_FREQ?> value="<?=$query_freq?>" pattern='^\s*\d*\s*$'>
         minutes
       </div>
     </div>

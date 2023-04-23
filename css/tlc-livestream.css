@@ -47,6 +47,18 @@ form.tlc span.input-info {
   font-weight:200;
 }
 
+span.tlc-status {
+  margin-left:20px;
+  padding-left:10px;
+  padding-right:10px;
+  font-weight:200;
+  background:yellow;
+  color:black;
+  border:solid;
+  border-width:1px;
+  border-color:lightgray;
+}
+
 input:invalid {
   background-color:lightpink;
 }

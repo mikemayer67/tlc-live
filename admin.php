@@ -12,6 +12,7 @@ require_once tlc_plugin_path('logger.php');
 require_once tlc_plugin_path('settings.php');
 
 const SETTINGS_NONCE = 'tlc-live-settings';
+const SETTINGS_PAGE_SLUG = 'tlc-livestream-settings';
 
 function handle_init()
 {
@@ -29,10 +30,10 @@ function handle_admin_init()
 function handle_admin_menu()
 {
   add_options_page(
-    'TLC Livestream Settings', // page title
+    'TLC Livestream', // page title
     'TLC Livestream', // menu title
     'manage_options', // required capability
-    'tlc-livestream-settings', // settings page slug
+    SETTINGS_PAGE_SLUG, // settings page slug
     ns('populate_settings_page'), // callback to populate settingsn page
   );
     
@@ -47,6 +48,28 @@ function populate_settings_page()
 {
   if( !current_user_can('manage_options') ) { wp_die('Unauthorized user'); }
 
+  $cur_tab = $_GET["tab"] ?? 'settings';
+
+  echo "<div class=wrap>";
+  require tlc_plugin_path('templates/settings_header.php');
+
+  switch($cur_tab) {
+  case "settings":
+    populate_settings_tab();
+    break;
+  case "shortcode":
+    populate_shortcode_tab();
+    break;
+  case "test":
+    populate_test_tab();
+    break;
+  }
+
+  echo "</div>";
+}
+
+function populate_settings_tab()
+{
   $settings = Settings::instance();
   $updated = false;
 
@@ -119,11 +142,17 @@ function populate_settings_page()
   // query is enterred in minutes
   $query_freq = floor($query_freq/60);
 
-  $title = esc_html(get_admin_page_title());
   $nonce = wp_nonce_field(SETTINGS_NONCE);
 
-  require tlc_plugin_path('templates/settings_page.php');
+  require tlc_plugin_path('templates/settings_tab.php');
 }
 
+function populate_shortcode_tab()
+{
+  require tlc_plugin_path('templates/shortcode.php');
+}
 
-
+function populate_test_tab()
+{
+  echo "add templates/test.php";
+}

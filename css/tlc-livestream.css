@@ -13,6 +13,7 @@ form.tlc div.label {
 form.tlc div.info {
   font-weight: 200;
   margin-left: 30px;
+  margin-bottom: 5px;
 }
 
 form.tlc div.info ul {

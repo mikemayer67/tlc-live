@@ -55,4 +55,61 @@ function validate_api_key($key)
   return array('valid'=>false, 'reason'=>'Internal Error');
 }
 
+function validate_channel_id($channel,$key)
+{
+  if( empty($channel) ) {
+    return array("valid"=>false, "reason"=>"required");
+  }
+  if( empty($key) ) {
+    return array("valid"=>false, "reason"=>"cannot validate without API Key");
+  }
 
+  $youtube_api = "https://youtube.googleapis.com/youtube/v3/channels";
+  $query = http_build_query( array(
+    'part' => 'id,snippet',
+    'id' => $channel,
+    'fields' => 'items(id, snippet(title))',
+    'key' => $key,
+  ));
+  $url = $youtube_api . '?' . $query;
+  $ch = curl_init($url);
+  curl_setopt_array($ch,
+    array(
+      CURLOPT_TIMEOUT => 5,
+      CURLOPT_RETURNTRANSFER => true,
+    )
+  );
+  $result = curl_exec($ch);
+  $response_code = curl_getinfo($ch,CURLINFO_RESPONSE_CODE);
+  $errno = curl_errno($ch);
+  $err = curl_error($ch);
+  curl_close($ch);
+
+  switch($response_code) {
+  case 200:
+    log_info($result);
+    $result = json_decode($result,true);
+    if(empty($result)) {
+      return array('valid'=>false, 'reason'=>"Invalid Channel ID");
+    }
+    $title = $result['items'][0]['snippet']['title'];
+    return array('valid'=>true, 'title'=>$title);
+  case 400:
+    return array('valid'=>false, 'reason'=>"Invalid API Key");
+  case 403:
+    return array('valid'=>false, 'reason'=>"Missing API Key");
+  }
+  if( $errno != 0 ) {
+    log_error("Valid API Key:: $errno [$err]");
+    return array('valid'=>false, 'reason'=>"$errno [$err]");
+  }
+
+  log_error("Validate API Key:: Unknown Failure");
+  log_error("    URL=$url");
+  log_error("    result=$result");
+  log_error("    errno=$errno [$err]");
+  log_error("    response_code=".curl_getinfo($ch,CURLINFO_RESPONSE_CODE));
+  log_error("    content_type=".curl_getinfo($ch,CURLINFO_CONTENT_TYPE));
+
+  return array('valid'=>false, 'reason'=>'Internal Error');
+}

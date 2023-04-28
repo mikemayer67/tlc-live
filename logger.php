@@ -17,7 +17,7 @@ class Logger
 
   private function __construct() {
     $logfile = tlc_plugin_path('tlc-livestream.log');
-    if( file_exists($logfile) and filesize($logfile) > 1024*1024 ) {
+    if( file_exists($logfile) and filesize($logfile) > 512*1024 ) {
       $tempfile = $logfile.".tmp";
       $fp = fopen($tempfile,"w");
       $skip = 1000;

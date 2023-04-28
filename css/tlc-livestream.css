@@ -64,5 +64,24 @@ input:invalid {
   background-color:lightpink;
 }
 
-  
+table.tlc-test {
+  margin-left:15px;
+}
+
+table.tlc-test td.label {
+  font-weight: bold;
+}
+
+table.tlc-test td.value {
+  padding-left:15px;
+  font-weight:200;
+}
+
+table.tlc-test td.status {
+  padding-left:15px;
+}
+
+table.tlc-test td.status img {
+  height:13px;
+}
 

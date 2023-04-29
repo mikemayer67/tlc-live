@@ -75,6 +75,21 @@ class ValidationQuery extends YouTubeQuery
     $this->_reason = "Query not run";
 
     parent::__construct($resource,$query_args);
+
+    $rc = $this->response_code();
+    if( $this->errno() ) {
+      $this->_state = self::UNKNOWN;
+      $this->_reason = $this->error();
+    } elseif($rc == 200) {
+      $this->_state = self::VALID;
+    } elseif( $rc == 400 || $rc == 403 ) {
+      $this->_state = self::INVALID;
+      $this->_reason = "Invalid API Key";
+    } else {
+      $this->_state = self::UNKNOWN;
+      $rc_text = http_response_code_string($rc);
+      $this->_reason = "Internal error: $rc [$rc_text]";
+    }
   }
 }
 
@@ -99,20 +114,6 @@ class ValidateAPIKey extends ValidationQuery
       )
     );
 
-    $rc = $this->response_code();
-    if( $this->errno() ) {
-      $this->_state = self::UNKNOWN;
-      $this->_reason = $this->error();
-    } elseif($rc == 200) {
-      $this->_state = self::VALID;
-    } elseif( $rc == 400 || $rc == 403 ) {
-      $this->_state = self::INVALID;
-      $this->_reason = "Invalid API Key";
-    } else {
-      $this->_state = self::UNKNOWN;
-      $rc_text = http_response_code_string($rc);
-      $this->_reason = "Internal error: $rc [$rc_text]";
-    }
   }
 }
 
@@ -147,10 +148,7 @@ class ValidateChannelID extends ValidationQuery
     );
 
     $rc = $this->response_code();
-    if( $this->errno() ) {
-      $this->_state = self::UNKNOWN;
-      $this->_reason = $this->error();
-    } elseif($rc == 200) {
+    if($rc == 200) {
       $result = json_decode($this->result(),true);
       if(empty($result)) {
         $this->_state = self::INVALID;
@@ -162,11 +160,59 @@ class ValidateChannelID extends ValidationQuery
     } elseif( $rc == 400 || $rc == 403 ) {
       $this->_state = self::UNKNOWN;
       $this->_reason = "Valid API Key needed to validate channel ID";
-    } else {
-      $this->_state = self::UNKNOWN;
-      $rc_text = http_response_code_string($rc);
-      $this->_reason = "Internal error: $rc [$rc_text]";
     }
   }
 }
+
+class ValidatePlaylistID extends ValidationQuery
+{
+  private $_title;
+  public function title() { return $this->is_valid() ? $this->_title : ''; }
+
+  public function __construct($playlist_id, $api_key)
+  {
+    $this->_title = "";
+
+    if(empty($playlist_id)) {
+      $this->_state = self::MISSING;
+      $this->_reason = "Recorded streams will not be shown";
+      return;
+    }
+    if(empty($api_key)) {
+      $this->_state = self::MISSING;
+      $this->_reason = "API Key needed to validate playlist ID";
+      return;
+    }
+
+    parent::__construct(
+      "playlists",
+      array(
+        'part' => 'snippet',
+        'id' => $playlist_id,
+        'fields' => 'pageInfo,items(snippet(title))',
+        'key' => $api_key,
+      )
+    );
+
+    $rc = $this->response_code();
+    if($rc == 200) {
+      $result = json_decode($this->result(),true);
+      if(empty($result)) {
+        $this->_state = self::INVALID;
+        $this->_reason = 'Invalid Playlist ID';
+      } elseif($result['pageInfo']['totalResults']<1) {
+        $this->_state = self::INVALID;
+        $this->_reason = 'Invalid Playlist ID';
+      } else {
+        $this->_state = self::VALID;
+        $this->_title = $result['items'][0]['snippet']['title'];
+      }
+    } elseif( $rc == 400 || $rc == 403 ) {
+      $this->_state = self::UNKNOWN;
+      $this->_reason = "Valid API Key needed to validate playlist ID";
+    }
+  }
+}
+
+https://youtube.googleapis.com/youtube/v3/playlists?part=snippet&id=PL8DAhhdAsXZ1jwwVrYFXq&key=AIzaSyBCGZzBICuBPpg4HUikA24_RArA51scu2w
 

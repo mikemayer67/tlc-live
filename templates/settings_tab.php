@@ -77,7 +77,6 @@ $transition_d = ($transition - $transition_h) / 24;
 $query_freq = floor($query_freq/60);
 
 $nonce = wp_nonce_field(SETTINGS_NONCE);
-
 ?>
 
 <form id='tlc-livestream-settings' class='tlc' method="POST">

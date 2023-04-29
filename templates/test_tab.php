@@ -38,9 +38,21 @@ if( $channel_status->is_valid() ) {
   $channel_reason = $channel_status->reason();
 }
 
+$playlist_status = new ValidatePlaylistID($playlist,$api_key);
+if( $playlist_status->is_valid() ) {
+  $playlist_icon = $ok;
+  $playlist_reason = $playlist_status->title();
+} elseif( $playlist_status->is_invalid() ) {
+  $playlist_icon = $bad;
+  $playlist_reason = $playlist_status->reason();
+} else {
+  $playlist_icon = $unknown;
+  $playlist_reason = $playlist_status->reason();
+}
+
 ?>
 
-<h2>Connection Parameters</h2>
+<h2>Connection Validation</h2>
 <table class='tlc-test'>
   <tr>
     <td class=label>YouTube API Key</td>
@@ -57,5 +69,7 @@ if( $channel_status->is_valid() ) {
   <tr>
     <td class=label>Playlist ID</td>
     <td class=value><?=$playlist?></td>
+    <td class=status><img src='<?=$playlist_icon?>'></img></td>
+    <td class=status><span><?=$playlist_reason?></span></td>
   </tr>
 </table>

@@ -58,7 +58,7 @@ function tlc_plugin_url($rel_path)
   return plugin_dir_url(__FILE__).'/'.$rel_path;
 }
 
-require_once tlc_plugin_path('logger.php');
+require_once tlc_plugin_path('include/logger.php');
 require_once tlc_plugin_path('settings.php');
 
 /**

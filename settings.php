@@ -1,7 +1,7 @@
 <?php
 namespace TLC\Live;
 
-require_once tlc_plugin_path('logger.php');
+require_once tlc_plugin_path('include/logger.php');
 
 /**
  * Setup and handling of plugin settings

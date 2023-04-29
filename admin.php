@@ -8,7 +8,7 @@ namespace TLC\Live;
 if( ! defined('WPINC') ) { die; }
 if( ! is_admin() ) { return; }
 
-require_once tlc_plugin_path('logger.php');
+require_once tlc_plugin_path('include/logger.php');
 require_once tlc_plugin_path('settings.php');
 
 const SETTINGS_NONCE = 'tlc-live-settings';

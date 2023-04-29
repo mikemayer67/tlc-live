@@ -1,6 +1,8 @@
 <?php
 namespace TLC\Live;
 
+if( ! defined('WPINC') ) { die; }
+
 class Logger
 {
   private static $_instance = null;
@@ -14,8 +16,8 @@ class Logger
 
 
   private function __construct() {
-    $logfile = join(DIRECTORY_SEPARATOR,[TLC_LIVESTREAM_DIR,'log.txt']);
-    if( file_exists($logfile) and filesize($logfile) > 1024*1024 ) {
+    $logfile = tlc_plugin_path('tlc-livestream.log');
+    if( file_exists($logfile) and filesize($logfile) > 512*1024 ) {
       $tempfile = $logfile.".tmp";
       $fp = fopen($tempfile,"w");
       $skip = 1000;

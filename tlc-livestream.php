@@ -12,33 +12,90 @@ namespace TLC\Live;
  * License URL: https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-if( ! defined('WPINC') ) {
-  die;
-}
+if( ! defined('WPINC') ) { die; }
 
+/**
+ * scope the specified string to the plugin namespace
+ *
+ * @param string $name function, variable, class, etc. in plugin namespace
+ * @return string namespace scoped name
+ */
 function ns($s)
 {
   return __NAMESPACE__.'\\'.$s;
 }
 
-define('TLC_LIVESTREAM_DIR',plugin_dir_path(__FILE__));
-define('TLC_LIVESTREAM_URL',plugin_dir_url(__FILE__));
-
-require_once 'admin/settings.php';
-require_once 'admin/maintenance.php';
-require_once 'public/shortcode.php';
-
-require_once __DIR__ . '/vendor/autoload.php';
-
-register_activation_hook(   __FILE__, ns('handle_activate') );
-register_deactivation_hook( __FILE__, ns('handle_deactivate') );
-register_uninstall_hook(    __FILE__, ns('handle_uninstall') );
-
-if( is_admin() ) {
-  add_action('admin_menu', ns('handle_admin_menu'));
-  add_action('admin_init', ns('handle_admin_init'));
-  add_action('init',       ns('handle_init'));
+/**
+ * return absolute path to a file in the plugin directory
+ * 
+ * @param path relative to plugin directory
+ * @return absolute path to plugin file
+ */
+function tlc_plugin_path($rel_path)
+{
+  return plugin_dir_path(__FILE__).'/'.$rel_path;
 }
 
+/**
+ * return absolute path to the plugin file
+ * 
+ * @param path relative to plugin directory
+ * @return absolute path to plugin file
+ */
+function tlc_plugin_file()
+{
+  return __FILE__;
+}
+
+/**
+ * return url to a plugin resource
+ * 
+ * @param path relative to plugin directory
+ * @return string url to plugin resource
+ */
+function tlc_plugin_url($rel_path)
+{
+  return plugin_dir_url(__FILE__).'/'.$rel_path;
+}
+
+require_once tlc_plugin_path('include/logger.php');
+require_once tlc_plugin_path('settings.php');
+
+/**
+ * plugin activation hooks
+ */
+
+function handle_activate()
+{
+  log_info('activate: '.__NAMESPACE__);
+  
+}
+
+function handle_deactivate()
+{
+  log_info('deactivate: '.__NAMESPACE__);
+}
+
+function handle_uninstall()
+{
+  Settings::uninstall();
+}
+
+register_activation_hook(   tlc_plugin_file(), ns('handle_activate') );
+register_deactivation_hook( tlc_plugin_file(), ns('handle_deactivate') );
+register_uninstall_hook(    tlc_plugin_file(), ns('handle_uninstall') );
+
+/**
+ * admin setup
+ */
+if( is_admin() )
+{
+  require_once tlc_plugin_path('admin.php');
+}
+
+/**
+ * shortcode setup (non-admin)
+ */
+require_once 'shortcode.php';
 add_shortcode('tlc-livestream', ns('handle_shortcode'));
 

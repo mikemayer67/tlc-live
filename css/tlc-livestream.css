@@ -86,13 +86,17 @@ table.tlc-overview td.status img {
 }
 
 table.tlc-overview td.info {
-  padding-top:10px;
-  font-weight:bolder;
+  padding-top:5px;
 }
 
 table.tlc-overview td.warning {
   font-weight:bolder;
   font-style:italic;
-  color:#400000;
+  color:#c00000;
+}
+
+table.tlc-overview td.note {
+  padding-top:5px;
+  color:blue;
 }
 

@@ -83,8 +83,8 @@ $autoplay = ( $settings->get(AUTOPLAY)
 );
 
 $controls = ( $settings->get(CONTROLS)
-  ? "Playback contols <b>will</b> displayed in the player."
-  : "Playback contols will <b>not</b> displayed in the player."
+  ? "Playback contols <b>will</b> be displayed in the player."
+  : "Playback contols will <b>not</b> be displayed in the player."
 );
 
 $enablekb = ($settings->get(ENABLE_KB)
@@ -154,10 +154,32 @@ if( empty($transition) ) {
     <td class=status><img src='<?=$playlist_icon?>'></img></td>
     <td class=status><span><?=$playlist_reason?></span></td>
   </tr>
+
+<?php if(!$api_key_is_good) {?>
+  <tr>
+    <td class=warning colspan=4>
+      Without a validated API Key, the shortcode will not be able to function.
+    </td>
+  </tr>
+<?php } if(!$channel_is_good) {?>
+  <tr>
+    <td class=warning colspan=4>
+      Without a validated Channel ID, the shortcode will not be able to function.
+    </td>
+  </tr>
+<?php } if(!$playlist_is_good) {?>
+  <tr>
+    <td class=note colspan=4>
+      Without a validated Playlist ID, only live and upcoming livestreams will be shown.<br>
+      The Playlist ID allows showing most previously recorded livestream as well.
+    </td>
+  </tr>
+<?php } ?>
+
   <tr>
     <td class=info colspan=4>
       YouTube API queries will occur no more frequently than once every 
-      <?=($query_freq>1 ? "$query_freq minutes" : "minute")?>.
+      <b><?=($query_freq>1 ? "$query_freq minutes" : "minute")?></b>.
     </td>
   </tr>
 </table>
@@ -175,8 +197,8 @@ if( empty($transition) ) {
   </tr>
 <?php } else { ?>
   <tr>
-    <td class=warning>
-      Can only be shown if both the current API Key and Channel ID are valid.
+    <td class=note>
+      Only available if both the current API Key and Channel ID are valid.
     </td>
   </tr>
 <?php } ?>
@@ -208,7 +230,7 @@ if( empty($transition) ) {
   </tr>
   <tr>
     <td class=info colspan=2>
-      The transition from recorded to upcoming livestream will occur <?=$transition?> 
+      The transition from recorded to upcoming livestream will occur <b><?=$transition?></b>
       the scheduled start time.
     </td>
   </tr>

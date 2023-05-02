@@ -58,7 +58,6 @@ class ValidationQuery extends YouTubeQuery
   const VALID = 0;
   const INVALID = 1;
   const UNKNOWN = 2;
-  const MISSING = 3;
 
   protected $_state;
   protected $_reason;
@@ -66,7 +65,6 @@ class ValidationQuery extends YouTubeQuery
   public function is_valid()   { return $this->_state == self::VALID;   }
   public function is_invalid() { return $this->_state == self::INVALID; }
   public function is_unknown() { return $this->_state == self::UNKNOWN; }
-  public function is_missing_param() { return $this->_state == self::MISSING; }
 
   public function reason() { return $this->_reason; }
 
@@ -97,12 +95,6 @@ class ValidateAPIKey extends ValidationQuery
 {
   public function __construct($api_key)
   {
-    if(empty($api_key)) {
-      $this->_state = self::INVALID;
-      $this->_reason = "required";
-      return;
-    }
-
     parent::__construct(
       "videos",
       array(
@@ -126,13 +118,8 @@ class ValidateChannelID extends ValidationQuery
   {
     $this->_title = "";
 
-    if(empty($channel_id)) {
-      $this->_state = self::INVALID;
-      $this->_reason = "required";
-      return;
-    }
     if(empty($api_key)) {
-      $this->_state = self::MISSING;
+      $this->_state = self::UNKNOWN;
       $this->_reason = "API Key needed to validate channel ID";
       return;
     }
@@ -173,13 +160,8 @@ class ValidatePlaylistID extends ValidationQuery
   {
     $this->_title = "";
 
-    if(empty($playlist_id)) {
-      $this->_state = self::MISSING;
-      $this->_reason = "Recorded streams will not be shown";
-      return;
-    }
     if(empty($api_key)) {
-      $this->_state = self::MISSING;
+      $this->_state = self::UNKNOWN;
       $this->_reason = "API Key needed to validate playlist ID";
       return;
     }
@@ -213,6 +195,3 @@ class ValidatePlaylistID extends ValidationQuery
     }
   }
 }
-
-https://youtube.googleapis.com/youtube/v3/playlists?part=snippet&id=PL8DAhhdAsXZ1jwwVrYFXq&key=AIzaSyBCGZzBICuBPpg4HUikA24_RArA51scu2w
-

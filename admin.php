@@ -51,7 +51,7 @@ function populate_settings_page()
 {
   if( !current_user_can('manage_options') ) { wp_die('Unauthorized user'); }
 
-  $cur_tab = $_GET["tab"] ?? 'settings';
+  $cur_tab = $_GET["tab"] ?? 'overview';
 
   echo "<div class=wrap>";
   require tlc_plugin_path('templates/settings_header.php');

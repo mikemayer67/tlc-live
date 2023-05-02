@@ -64,24 +64,35 @@ input:invalid {
   background-color:lightpink;
 }
 
-table.tlc-test {
+table.tlc-overview {
   margin-left:15px;
 }
 
-table.tlc-test td.label {
+table.tlc-overview td.label {
   font-weight: bold;
 }
 
-table.tlc-test td.value {
+table.tlc-overview td.value {
   padding-left:15px;
   font-weight:200;
 }
 
-table.tlc-test td.status {
+table.tlc-overview td.status {
   padding-left:15px;
 }
 
-table.tlc-test td.status img {
+table.tlc-overview td.status img {
   height:13px;
+}
+
+table.tlc-overview td.info {
+  padding-top:10px;
+  font-weight:bolder;
+}
+
+table.tlc-overview td.warning {
+  font-weight:bolder;
+  font-style:italic;
+  color:#400000;
 }
 

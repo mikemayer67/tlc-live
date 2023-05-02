@@ -19,9 +19,9 @@ if(($_POST['action'] ?? null) == "update") {
 
 <?php
 $tabs = [
+  ['overview','Overview'],
   ['settings','Settings'],
   ['shortcode','Shortcode'],
-  ['test','Test'],
 ];
 
 foreach($tabs as $tab) {

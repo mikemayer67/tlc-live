@@ -40,9 +40,7 @@ function http_response_code_string($code)
     case 503: $text = 'Service Unavailable'; break;
     case 504: $text = 'Gateway Time-out'; break;
     case 505: $text = 'HTTP Version not supported'; break;
-    default:
-        exit('Unknown http status code "' . htmlentities($code) . '"');
-    break;
+    default:  $text = 'Unknown code'; break;
   }
 
   return $text;

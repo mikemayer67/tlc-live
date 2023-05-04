@@ -82,7 +82,6 @@ class Settings
       } catch (Exception $e) {
       }
     }
-    log_info("Settings:: $this");
   }
 
   /**

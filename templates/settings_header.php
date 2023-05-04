@@ -10,12 +10,10 @@ if(($_POST['action'] ?? null) == "update") {
 
   $status = "<span class='tlc-status'>udpated</span>";
 
-  log_info("update settings");
   if( !wp_verify_nonce($_POST['_wpnonce'],SETTINGS_NONCE) ) { 
     log_error("failed to validate nonce");
     wp_die("Bad nonce");
   }
-  log_info("_POST: ".json_encode($_POST));
 
   $settings = Settings::instance();
 

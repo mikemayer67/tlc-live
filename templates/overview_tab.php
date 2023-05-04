@@ -43,7 +43,6 @@ if( empty($channel) )
   $channel_status = new ValidateChannelID($channel,$api_key);
   $channel_is_good = $channel_status->is_valid();
   if( $channel_is_good ) {
-    $channel_is_good = true;
     $channel_icon = $ok;
     $channel_reason = $channel_status->title();
   } elseif( $channel_status->is_invalid() ) {
@@ -74,6 +73,13 @@ if( empty($playlist) )
     $playlist_reason = $playlist_status->reason();
   }
 }
+
+$playlist_ids = array();
+if($api_key_is_good and $channel_is_good) {
+  $query = new PlaylistIDs($channel,$api_key);
+  $playlist_ids = $query->playlists();
+}
+log_info("playlists: ".json_encode($playlist_ids));
 
 $query_freq = floor($settings->get(QUERY_FREQ)/60);
 
@@ -171,7 +177,7 @@ if( empty($transition) ) {
   <tr>
     <td class=note colspan=4>
       Without a validated Playlist ID, only live and upcoming livestreams will be shown.<br>
-      The Playlist ID allows showing most previously recorded livestream as well.
+      The Playlist ID allows showing the most previously recorded livestream.
     </td>
   </tr>
 <?php } ?>
@@ -187,24 +193,23 @@ if( empty($transition) ) {
 
 <h2>Available Playlists</h2>
 <table class='tlc-overview'>
-<?php if($api_key_is_good and $channel_is_good) { ?>
-<?php log_info("API Key: $api_key_is_good"); ?>
-<?php log_info("Channl ID: $channel_is_good"); ?>
-  <tr>
-    <td class=info>
-      Flesh this out.
-    </td>
-  </tr>
-<?php } else { ?>
-  <tr>
-    <td class=note>
-      Only available if both the current API Key and Channel ID are valid.
-    </td>
-  </tr>
-<?php } ?>
+<?php 
+if($api_key_is_good and $channel_is_good) {
+  if(count($playlist_ids)) {
+    echo("<tr class=heading><td colspan=2>");
+    echo("The following playlists are associated with channel $channel");
+    echo("</td></tr>");
+    foreach( $playlist_ids as $id=>$title ) {
+      echo("<tr><td class=id>$id</td><td class=status>$title</td></tr>");
+    }
+  } else {
+    echo("<tr><td class=note>No public playlists associated with channel $channel</td></tr>");
+  }
+} else {
+  echo("<tr><td class=note>Only available if both the current API Key and Channel ID are valid.</td></tr>");
+}
+?>
 </table>
-
-
 
 <h2>Livestream Settings</h2>
 <table class='tlc-overview'>

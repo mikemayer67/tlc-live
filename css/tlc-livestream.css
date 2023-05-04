@@ -100,3 +100,18 @@ table.tlc-overview td.note {
   color:blue;
 }
 
+table.tlc-overview tr.heading {
+  margin-bottom:15px;
+}
+
+table.tlc-overview tr.heading td {
+  font-weight:500;
+  padding-bottom:5px;
+}
+
+table.tlc-overview td.id {
+  padding-left:20px;
+  font-weight:500;
+}
+
+

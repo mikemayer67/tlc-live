@@ -16,16 +16,14 @@ const SETTINGS_PAGE_SLUG = 'tlc-livestream-settings';
 
 function handle_init()
 {
-  log_info("handle_init");
   wp_enqueue_style('tlc-livestream', tlc_plugin_url('css/tlc-livestream.css'));
 
   #add_javascript goes here
 }
 
-function handle_admin_init()
-{
-  log_info("handle_admin_init");
-}
+#function handle_admin_init()
+#{
+#}
 
 function handle_admin_menu()
 {
@@ -40,7 +38,7 @@ function handle_admin_menu()
 }
 
 add_action('admin_menu', ns('handle_admin_menu'));
-add_action('admin_init', ns('handle_admin_init'));
+#add_action('admin_init', ns('handle_admin_init'));
 add_action('init',       ns('handle_init'));
 
 

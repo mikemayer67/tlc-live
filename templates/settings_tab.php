@@ -61,12 +61,18 @@ $action = $_SERVER['SCRIPT_URI'].'?'.http_build_query(array(
     </div>
     <div class=label>Playlist ID</div>
     <div  class=info>
-      The Playlist ID is used to determine what to show when there is not an active livestream and it is not yet
-      time to start displaying the next upcoming livestream.  If the Playlist ID is not set or contains
-      an invalid value, only the active or next upcoming livestream will be displayed.
+      The Playlist ID is used to determine what to show when there is not an active livestream and it
+      is not yet time to start displaying the next upcoming livestream.  The most recently recorded
+      livestream on the playlist will be automatically selected. If the Playlist ID is not set or 
+      contains an invalid value, only live or upcoming livestreams will be displayed.
     </div>
-    <div id='tlc-playlist-info' class=info>
-      You can find your playlist from your YouTube channel:
+    <div class=info>
+      If you do not know the playlist ID, you can leave it blank for now.  The overview tab will
+      show all of the playlists associated with the channel used for live and upcoming livestreams.
+      If you want to use a playlist not associated with the same channel as live/upcoming livestreams,
+      you will need to figure out the Playlist ID by some other means.
+    </div>
+<!--
       <ul>
         <li>Go to <a href='https://youtube.com' target='_blank' rel='noopener noreferrer'>Youtube</a></li>
         <li>Sign in (<i>upper right corner</i>) if not already logged in</li>
@@ -75,6 +81,7 @@ $action = $_SERVER['SCRIPT_URI'].'?'.http_build_query(array(
         <li>Click on the "View full playlist" under the playlist you want to use.</li>
         <li>Look at the url. You will see the playlist ID following "list="</li>
       </ul>
+-->
     </div>
     <div class=input>
       <td><input type="text" name=<?=PLAYLIST_ID?> value="<?=$playlist?>" pattern='^[a-zA-Z0-9_]*$'></td>

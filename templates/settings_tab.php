@@ -82,7 +82,6 @@ $action = $_SERVER['SCRIPT_URI'].'?'.http_build_query(array(
         <li>Look at the url. You will see the playlist ID following "list="</li>
       </ul>
 -->
-    </div>
     <div class=input>
       <td><input type="text" name=<?=PLAYLIST_ID?> value="<?=$playlist?>" pattern='^[a-zA-Z0-9_]*$'></td>
     </div>
@@ -100,6 +99,10 @@ $action = $_SERVER['SCRIPT_URI'].'?'.http_build_query(array(
       hours
       <input type='text' class='tls-time' name='transition_m' value="<?=$transition_m?>" pattern='^\s*\d*\s*$'>
       minutes
+    </div>
+    <div class=info style='padding-top:10px;'>
+      This transition will happen automatically if Javascript is enabled. Otherwise, the page
+      will need to be manually refreshed to see the transition.
     </div>
     <div class=label>Embedded Livestream Options</div>
     <div class=info>

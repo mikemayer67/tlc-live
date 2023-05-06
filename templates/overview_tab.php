@@ -74,13 +74,6 @@ if( empty($playlist) )
   }
 }
 
-$playlist_ids = array();
-if($api_key_is_good and $channel_is_good) {
-  $query = new PlaylistIDs($channel,$api_key);
-  $playlist_ids = $query->playlists();
-}
-log_info("playlists: ".json_encode($playlist_ids));
-
 $query_freq = floor($settings->get(QUERY_FREQ)/60);
 
 $autoplay = ( $settings->get(AUTOPLAY)
@@ -136,7 +129,6 @@ if( empty($transition) ) {
 } else {
   $transition = "$transition before";
 }
-
 ?>
 
 
@@ -195,6 +187,10 @@ if( empty($transition) ) {
 <table class='tlc-overview'>
 <?php 
 if($api_key_is_good and $channel_is_good) {
+  $query = new PlaylistIDs($channel,$api_key);
+  $playlist_ids = $query->playlists();
+  log_info("playlists: ".json_encode($playlist_ids));
+
   if(count($playlist_ids)) {
     echo("<tr class=heading><td colspan=2>");
     echo("The following playlists are associated with channel $channel");
@@ -239,6 +235,47 @@ if($api_key_is_good and $channel_is_good) {
       the scheduled start time.
     </td>
   </tr>
-<?php
+</table>
+
+<?php if($api_key_is_good and $channel_is_good) { ?>
+<h2>Active Livestream</h2>
+There is currently no active livestream.
+<?php } ?>
+
+<?php if($api_key_is_good and $channel_is_good) {
+  function by_scheduled_start($a,$b) {
+    return $a['scheduledStart'] <=> $b['scheduledStart'];
+  }
+
+  $query = new UpcomingLivestreams($channel,$api_key);
+  $upcoming_livestreams = $query->livestreams();
+  uasort($upcoming_livestreams,ns('by_scheduled_start'));
+  date_default_timezone_set('America/New_York');
 ?>
+<h2>Upcoming Livestreams</h2>
+<table class='tlc-overview'>
+<?php
+  foreach($upcoming_livestreams as $vid=>$details) {
+    $title = $details['title'];
+    $thumb = $details['thumbnail'];
+    $start = date('r',$details['scheduledStart']);
+?>
+<tr>
+  <td class=id><?=$start?></td>
+  <td class=value><?=$title?></td>
+  <td class=thumb><a href='https://youtube.com/watch?v=<?=$vid?>' target=_blank>
+    <img src='<?=$thumb?>'></img></a></td>
+</tr>
+<?php
+  }
+?>
+</table>
+<?php } else { ?>
+There are currently no scheduled upcoming livestreams.
+<?php } ?>
+
+<?php if($api_key_is_good and $playlist_is_good) { ?>
+<h2>Most Current Recorded Video</h2>
+<?php } ?>
+
 

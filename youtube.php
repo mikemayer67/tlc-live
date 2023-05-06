@@ -5,6 +5,9 @@ if( ! defined('WPINC') ) { die; }
 
 require_once tlc_plugin_path('include/logger.php');
 require_once tlc_plugin_path('include/http.php');
+require_once tlc_plugin_path('settings.php');
+
+const TRANSIENT_UPCOMING_KEY = 'tlc_livestream_upcoming';
 
 class Query
 {
@@ -205,7 +208,7 @@ class ValidatePlaylistID extends ValidationQuery
       }
     } elseif( $this->bad_id() ) {
       $this->_state = self::UNKNOWN;
-      $this->_reason = "Valid API Key needed to validate channel ID";
+      $this->_reason = "Valid API Key needed to validate playlist ID";
     }
   }
 }
@@ -271,7 +274,111 @@ class PlaylistIDs extends YouTubeListQuery
       $this->_playlists[$id] = $title;
     }
   }
-  
+}
+
+class LivestreamDetails extends YouTubeListQuery
+{
+  private $_details;
+  public function details() { return $this->_details; }
+
+  public function __construct($video_ids, $api_key)
+  {
+    $ids = implode(',',$video_ids);
+
+    parent::__construct(
+      "videos",
+      array(
+        "part"=>"liveStreamingDetails",
+        "id"=>$ids,
+        "fields"=>"items(id,liveStreamingDetails)",
+        "key"=>$api_key,
+      ),
+    );
+
+    if( ! $this->ok() ) { return; }
+
+    $this->_details = array();
+
+    foreach( $this->items() as &$item) {
+      $id = $item['id'];
+      if( array_key_exists('liveStreamingDetails',$item) )
+      {
+        $this->_details[$id] = array();
+        foreach( $item['liveStreamingDetails'] as $key => $value ) 
+        {
+          $this->_details[$id][$key] = $value;
+        }
+      }
+    }
+  }
 }
 
 
+class UpcomingLivestreams extends YouTubeListQuery
+{
+  private $_livestreams;
+
+  public function livestreams() { return $this->_livestreams; }
+
+  public function __construct($channel_id, $api_key)
+  {
+    $cache = get_transient(TRANSIENT_UPCOMING_KEY);
+
+    if(is_array($cache)) {
+      if( $cache['channel'] == $channel_id) {
+        $this->_livestreams = $cache['livestreams'];
+        log_info("Using cached livestream details");
+        return;
+      }
+    }
+    log_info("Querying livestream details from YouTube API");
+
+    parent::__construct(
+      "search",
+      array(
+        'part' => 'snippet',
+        'channelId' => $channel_id,
+        'eventType' => 'upcoming',
+        'type' => 'video',
+        'fields' => 'items(id(videoId),snippet(title,thumbnails(default(url))))',
+        'key' => $api_key,
+      ),
+    );
+
+    $this->_livestreams = array();
+
+    if( $this->ok() ) {
+      foreach ($this->items() as &$item ) {
+        $id = $item['id']['videoId'];
+        $this->_livestreams[$id] = array(
+          "title" => $item['snippet']['title'],
+          "thumbnail" => $item['snippet']['thumbnails']['default']['url'] ?? "",
+        );
+      }
+      $query = new LivestreamDetails(array_keys($this->_livestreams),$api_key);
+      $details = $query->details();
+
+      foreach( $details as $id => $vd )
+      {
+        if( array_key_exists('scheduledStartTime',$vd) )
+        {
+          $startTime = strtotime($vd['scheduledStartTime']);
+          $this->_livestreams[$id]['scheduledStart'] = $startTime;
+        }
+      }
+    }
+
+    $settings = Settings::instance();
+
+    set_transient(
+      TRANSIENT_UPCOMING_KEY,
+      array(
+        'channel' => $channel_id,
+        'livestreams' => $this->_livestreams,
+      ),
+      $settings->get(QUERY_FREQ),
+    );
+    log_info("Livestreams caching livestream data");
+
+  }
+}

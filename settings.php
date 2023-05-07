@@ -31,6 +31,7 @@ const FULL_SCREEN = 'fullscreen';
 const MODEST_BRANDING = 'modestbranding';
 const TRANSITION = 'transition';
 const QUERY_FREQ = 'query_freq';
+const TIMEZONE = 'timezone';
 
 const OPTION_DEFAULTS = [
   API_KEY => '',
@@ -43,6 +44,7 @@ const OPTION_DEFAULTS = [
   QUERY_FREQ => 300,
   MODEST_BRANDING => true,
   TRANSITION => 1800,
+  TIMEZONE => 'America/New_York',
 ];
 
 class Settings

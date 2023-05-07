@@ -114,4 +114,8 @@ table.tlc-overview td.id {
   font-weight:500;
 }
 
+form.tlc-overview span.input-label {
+  padding-left:20px;
+}
+
 

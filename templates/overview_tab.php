@@ -9,6 +9,7 @@ $settings = Settings::instance();
 $api_key = $settings->get(API_KEY);
 $channel = $settings->get(CHANNEL_ID);
 $playlist = $settings->get(PLAYLIST_ID);
+$timezone = $settings->get(TIMEZONE);
 
 $ok = tlc_plugin_url('images/icons8-valid.png');
 $bad = tlc_plugin_url('images/icons8-invalid.png');
@@ -189,7 +190,6 @@ if( empty($transition) ) {
 if($api_key_is_good and $channel_is_good) {
   $query = new PlaylistIDs($channel,$api_key);
   $playlist_ids = $query->playlists();
-  log_info("playlists: ".json_encode($playlist_ids));
 
   if(count($playlist_ids)) {
     echo("<tr class=heading><td colspan=2>");
@@ -250,11 +250,16 @@ There is currently no active livestream.
   $query = new UpcomingLivestreams($channel,$api_key);
   $upcoming_livestreams = $query->livestreams();
   uasort($upcoming_livestreams,ns('by_scheduled_start'));
-  date_default_timezone_set('America/New_York');
+  date_default_timezone_set($timezone);
 ?>
 <h2>Upcoming Livestreams</h2>
 <table class='tlc-overview'>
 <?php
+  $action = $_SERVER['SCRIPT_URI'].'?'.http_build_query(array(
+    'page'=>SETTINGS_PAGE_SLUG,
+    'tab'=>'overview',
+  ));
+  $nonce = wp_nonce_field(SETTINGS_NONCE);
   foreach($upcoming_livestreams as $vid=>$details) {
     $title = $details['title'];
     $thumb = $details['thumbnail'];
@@ -269,6 +274,27 @@ There is currently no active livestream.
 <?php
   }
 ?>
+<tr><td colspan=3>
+<form class=tlc-overview action='<?=$action?>' method="POST">
+  <input type=hidden name=action value=timezone>
+  <?=$nonce?>
+  <div>
+  <span class=input-label>Local Timezone</span>
+  <span class=>
+  <select name=timezone id='tlc-livestream-tz' value=<?=$timezone?>
+<?php
+  $timezones = \DateTimeZone::listIdentifiers();
+  foreach($timezones as $tz) {
+    $selected = $tz==$timezone ? 'selected=selected' : '';
+    print("<option value='$tz' $selected>$tz</option>");
+  }
+?>
+    </select>
+  </span>
+  <span><button type=select>Apply</span>
+  </div>
+</form>
+</td></tr>
 </table>
 <?php } else { ?>
 There are currently no scheduled upcoming livestreams.

@@ -53,6 +53,17 @@ if(($_POST['action'] ?? null) == "update") {
   $settings->set(QUERY_FREQ,$query_freq);
 }
 
+if(($_POST['action'] ?? null) == 'timezone') {
+  if( !wp_verify_nonce($_POST['_wpnonce'],SETTINGS_NONCE) ) { 
+    log_error("failed to validate nonce");
+    wp_die("Bad nonce");
+  }
+
+  $settings = Settings::instance();
+  $timezone = $_POST['timezone'];
+  $settings->set(TIMEZONE,$timezone);
+}
+
 ?>
 
 <h1>

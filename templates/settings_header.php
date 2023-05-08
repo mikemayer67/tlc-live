@@ -51,19 +51,10 @@ if(($_POST['action'] ?? null) == "update") {
   $query_freq = 60 * (int)($_POST[QUERY_FREQ]);
   if( $query_freq == 0 ) { $query_freq = 300; }
   $settings->set(QUERY_FREQ,$query_freq);
-}
 
-if(($_POST['action'] ?? null) == 'timezone') {
-  if( !wp_verify_nonce($_POST['_wpnonce'],SETTINGS_NONCE) ) { 
-    log_error("failed to validate nonce");
-    wp_die("Bad nonce");
-  }
-
-  $settings = Settings::instance();
-  $timezone = $_POST['timezone'];
+  $timezone = $_POST[TIMEZONE];
   $settings->set(TIMEZONE,$timezone);
 }
-
 ?>
 
 <h1>

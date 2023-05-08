@@ -9,13 +9,15 @@ $settings = Settings::instance();
 $api_key = $settings->get(API_KEY);
 $channel = $settings->get(CHANNEL_ID);
 $playlist = $settings->get(PLAYLIST_ID);
-$timezone = $settings->get(TIMEZONE);
 
 $ok = tlc_plugin_url('images/icons8-valid.png');
 $bad = tlc_plugin_url('images/icons8-invalid.png');
 $unknown = tlc_plugin_url('images/icons8-unknown.png');
 
+$timezone = $settings->get(TIMEZONE);
 date_default_timezone_set($timezone);
+
+// YouTube Keys and IDs
 
 $api_key_is_good = false;
 if( empty($api_key) )
@@ -79,6 +81,8 @@ if( empty($playlist) )
 
 $query_freq = floor($settings->get(QUERY_FREQ)/60);
 
+// Embed Settings
+
 $autoplay = ( $settings->get(AUTOPLAY)
   ? "The stream will <b>automatcally</b> start when it goes live."
   : "The viewer will need to <b>hit the play button</b> in the player to start the livestream."
@@ -103,6 +107,8 @@ $modestbranding = ($settings->get(MODEST_BRANDING)
   ? "The YouTube logo will <b>not</b> be shown unless the livestream is paused."
   : "The YouTube logo <b>may</b> be shown while the livestream is playing."
 );
+
+// Transition
 
 $transition = floor($settings->get(TRANSITION)/60);
 $transition_m = $transition % 60;
@@ -132,6 +138,42 @@ if( empty($transition) ) {
 } else {
   $transition = "$transition before";
 }
+
+// Playlists
+
+$playlist_ids = null;
+if($api_key_is_good and $channel_is_good) {
+  $query = new PlaylistIDs($channel,$api_key);
+  $playlist_ids = $query->playlists();
+}
+
+// Upcoming Livestreams
+
+function by_scheduled_start($a,$b) {
+  return $a['scheduledStart'] <=> $b['scheduledStart'];
+}
+
+$upcoming_livestreams = null;
+if($api_key_is_good and $channel_is_good) {
+  $query = new UpcomingLivestreams($channel,$api_key);
+  $upcoming_livestreams = $query->livestreams();
+  uasort($upcoming_livestreams,ns('by_scheduled_start'));
+}
+
+// Latest Recorded Video
+
+$latest_recorded_livestream = null;
+if($api_key_is_good and $playlist_is_good) {
+  $query = new RecordedLivestreams($playlist,$api_key);
+  $latest_start = 0;
+  foreach($query->livestreams() as $id=>$r) {
+    if($r['actualStart'] > $latest_start) {
+      $latest_start = $r['actualStart'];
+      $latest_recorded_livestream = $r;
+    }
+  }
+}
+
 ?>
 
 
@@ -156,27 +198,6 @@ if( empty($transition) ) {
     <td class=status><span><?=$playlist_reason?></span></td>
   </tr>
 
-<?php if(!$api_key_is_good) {?>
-  <tr>
-    <td class=warning colspan=4>
-      Without a validated API Key, the shortcode will not be able to function.
-    </td>
-  </tr>
-<?php } if(!$channel_is_good) {?>
-  <tr>
-    <td class=warning colspan=4>
-      Without a validated Channel ID, the shortcode will not be able to function.
-    </td>
-  </tr>
-<?php } if(!$playlist_is_good) {?>
-  <tr>
-    <td class=note colspan=4>
-      Without a validated Playlist ID, only live and upcoming livestreams will be shown.<br>
-      The Playlist ID allows showing the most previously recorded livestream.
-    </td>
-  </tr>
-<?php } ?>
-
   <tr>
     <td class=info colspan=4>
       YouTube API queries will occur no more frequently than once every 
@@ -188,25 +209,30 @@ if( empty($transition) ) {
 
 <h2>Available Playlists</h2>
 <table class='tlc-overview'>
-<?php 
-if($api_key_is_good and $channel_is_good) {
-  $query = new PlaylistIDs($channel,$api_key);
-  $playlist_ids = $query->playlists();
-
-  if(count($playlist_ids)) {
-    echo("<tr class=heading><td colspan=2>");
-    echo("The following playlists are associated with channel $channel");
-    echo("</td></tr>");
-    foreach( $playlist_ids as $id=>$title ) {
-      echo("<tr><td class=id>$id</td><td class=status>$title</td></tr>");
-    }
-  } else {
-    echo("<tr><td class=note>No public playlists associated with channel $channel</td></tr>");
-  }
-} else {
-  echo("<tr><td class=note>Only available if both the current API Key and Channel ID are valid.</td></tr>");
-}
-?>
+<?php if(is_null($playlist_ids)) { ?>
+  <tr>
+    <td class=note colspan=2>
+      Only available if both the current API Key and Channel ID are valid.
+   </td>
+  </tr>
+<?php } elseif(count($playlist_ids)<1) { ?>
+  <tr>
+    <td class=note colspan=2>
+    No public playlists associated with channel <?=$channel?>
+    </td>
+  </tr>
+<?php } else { ?>
+  <tr class=heading>
+    <td colspan=2>
+    The following playlists are associated with channel <?=$channel?>
+    </td>
+  </tr>
+<?php foreach( $playlist_ids as $id=>$title) {?>
+  <tr>
+    <td class=id><?=$id?></td>
+    <td class=status><?=$title?></td>
+  </tr>
+<?php }} ?>
 </table>
 
 <h2>Livestream Settings</h2>
@@ -239,94 +265,87 @@ if($api_key_is_good and $channel_is_good) {
   </tr>
 </table>
 
-<?php if($api_key_is_good and $channel_is_good) { ?>
-<h2>Active Livestream</h2>
-There is currently no active livestream.
-<?php } ?>
 
-<?php if($api_key_is_good and $channel_is_good) {
-  function by_scheduled_start($a,$b) {
-    return $a['scheduledStart'] <=> $b['scheduledStart'];
-  }
-
-  $query = new UpcomingLivestreams($channel,$api_key);
-  $upcoming_livestreams = $query->livestreams();
-  uasort($upcoming_livestreams,ns('by_scheduled_start'));
-?>
 <h2>Upcoming Livestreams</h2>
 <table class='tlc-overview'>
-<?php
-  $action = $_SERVER['SCRIPT_URI'].'?'.http_build_query(array(
-    'page'=>SETTINGS_PAGE_SLUG,
-    'tab'=>'overview',
-  ));
-  $nonce = wp_nonce_field(SETTINGS_NONCE);
+<?php if(is_null($upcoming_livestreams)) { ?>
+  <tr>
+    <td class=note colspan=2>
+      Only available if both the current API Key and Channel ID are valid.
+   </td>
+  </tr>
+<?php } elseif(count($upcoming_livestreams)<1) { ?>
+  <tr>
+    <td class=note colspan=2>
+    There are currently no scheduled upcoming livestreams.
+    </td>
+  </tr>
+<?php } else { 
   foreach($upcoming_livestreams as $vid=>$details) {
     $title = $details['title'];
     $thumb = $details['thumbnail'];
     $start = date('r',$details['scheduledStart']);
 ?>
-<tr>
-  <td class=id><?=$start?></td>
-  <td class=value><?=$title?></td>
-  <td class=thumb><a href='https://youtube.com/watch?v=<?=$vid?>' target=_blank>
-    <img src='<?=$thumb?>'></img></a></td>
-</tr>
-<?php
-  }
-?>
-<tr><td colspan=3>
-<form class=tlc-overview action='<?=$action?>' method="POST">
-  <input type=hidden name=action value=timezone>
-  <?=$nonce?>
-  <div>
-  <span class=input-label>Local Timezone</span>
-  <span class=>
-  <select name=timezone id='tlc-livestream-tz' value=<?=$timezone?>
-<?php
-  $timezones = \DateTimeZone::listIdentifiers();
-  foreach($timezones as $tz) {
-    $selected = $tz==$timezone ? 'selected=selected' : '';
-    print("<option value='$tz' $selected>$tz</option>");
-  }
-?>
-    </select>
-  </span>
-  <span><button type=select>Apply</span>
-  </div>
-</form>
-</td></tr>
+  <tr>
+    <td class=id><?=$start?></td>
+    <td class=value><?=$title?></td>
+    <td class=thumb><a href='https://youtube.com/watch?v=<?=$vid?>' target=_blank>
+      <img src='<?=$thumb?>'></img></a></td>
+  </tr>
+<?php }} ?>
 </table>
-<?php } else { ?>
-There are currently no scheduled upcoming livestreams.
-<?php } ?>
 
-<?php if($api_key_is_good and $playlist_is_good) {
-  $query = new RecordedLivestreams($playlist,$api_key);
-  $latest_start = 0;
-  $last_recorded_livestream = null;
-  $recorded_livestreams = $query->livestreams();
-  foreach($recorded_livestreams as $id=>$r) {
-    if($r['actualStart'] > $latest_start) {
-      $latest_start = $r['actualStart'];
-      $last_recorded_livestream = $r;
-    }
-  }
-?>
-<h2>Most Current Recorded Video</h2>
-<?php if($last_recorded_livestream) {
-  $title = $last_recorded_livestream['title'];
-  $thumb = $last_recorded_livestream['thumbnail'];
-  $start = date('r',$last_recorded_livestream['actualStart']);
-?>
+<h2>Most Recently Recorded Video</h2>
 <table class='tlc-overview'>
-<tr>
-  <td class=id><?=$start?></td>
-  <td class=value><?=$title?></td>
-  <td class=thumb><a href='https://youtube.com/watch?v=<?=$vid?>' target=_blank>
-    <img src='<?=$thumb?>'></img></a></td>
-</tr></table>
+<?php if($latest_recorded_livestream) {
+  $title = $latest_recorded_livestream['title'];
+  $thumb = $latest_recorded_livestream['thumbnail'];
+  $start = date('r',$latest_recorded_livestream['actualStart']);
+?>
+  <tr>
+    <td class=id><?=$start?></td>
+    <td class=value><?=$title?></td>
+    <td class=thumb><a href='https://youtube.com/watch?v=<?=$vid?>' target=_blank>
+      <img src='<?=$thumb?>'></img></a></td>
+  </tr></table>
+<?php } elseif($api_key_is_good and $playlist_is_good) { ?>
+  <tr>
+    <td class=note colspan=2>
+    There are currently no recorded livestreams.
+    </td>
+  </tr>
 <?php } else { ?>
-None Found
+  <tr>
+    <td class=note colspan=2>
+      Only available if both the current API Key and Playlist ID are valid.
+   </td>
+  </tr>
+
 <?php } ?>
+</table>
+
+<h2>Summary</h2>
+
+<table class='tlc-overview'>
+<?php if(!$api_key_is_good) {?>
+  <tr>
+    <td class=warning>
+      Without a validated API Key, the shortcode will not be able to function.
+    </td>
+  </tr>
+<?php } if(!$channel_is_good) {?>
+  <tr>
+    <td class=warning>
+      Without a validated Channel ID, the shortcode will not be able to function.
+    </td>
+  </tr>
+<?php } if(!$playlist_is_good) {?>
+  <tr>
+    <td class=warning>
+      Without a validated Playlist ID, only live and upcoming livestreams will be shown.
+    </td>
+  </tr>
 <?php } ?>
+</table>
+
+  

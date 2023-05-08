@@ -15,6 +15,7 @@ $fullscreen = $settings->get(FULL_SCREEN);
 $modestbranding = $settings->get(MODEST_BRANDING);
 $transition = $settings->get(TRANSITION);
 $query_freq = $settings->get(QUERY_FREQ);
+$timezone = $settings->get(TIMEZONE);
 
 // transition frequency is enterred in days, hours, minutes
 $transition = floor($transition/60);
@@ -32,6 +33,8 @@ $action = $_SERVER['SCRIPT_URI'].'?'.http_build_query(array(
   'tab'=>'overview',
 ));
 
+$timezones = \DateTimeZone::listIdentifiers();
+
 ?>
 
 <form id='tlc-livestream-settings' class='tlc' action='<?=$action?>' method="POST">
@@ -40,7 +43,7 @@ $action = $_SERVER['SCRIPT_URI'].'?'.http_build_query(array(
   <div class=tlc>
     <div class=label>YouTube API Key</div>
     <div class='info'>
-      The YouTube API key is used to query your YouTube channel to examine your playlist
+      The YouTube API key is used to query your YouTube channel and to examine your playlist
       to determine the most recently recorded livestream.  You must create this key
       via the <a href='https://console.cloud.google.com' target='_blank' rel='noopener noreferrer'>Google Cloud console</a>.
     </div>
@@ -164,6 +167,20 @@ $action = $_SERVER['SCRIPT_URI'].'?'.http_build_query(array(
     <div class=input>
       <input type='text' class='tls-time' name=<?=QUERY_FREQ?> value="<?=$query_freq?>" pattern='^\s*\d*\s*$'>
       minutes
+    </div>
+    <div class=label>Local Timezone</div>
+    <div class=info>
+      This is only used in the overview tab in the settings page for this plugin. 
+      It has no effect on how the shortcode is rendered for visitors to your site.
+    </div>
+    <div class=input>
+      <select name=timezone value=<?=$timezone?>>
+<?php foreach($timezones as $tz) { if( $tz == $timezone ) { ?>
+        <option value=<?=$tz?> selected=selected><?=$tz?></option>
+<?php } else { ?>
+        <option value=<?=$tz?>><?=$tz?></option>
+<?php }} ?>
+      </select>
     </div>
   </div>
   <input type="submit" value="Save" class="submit button button-primary button-large">

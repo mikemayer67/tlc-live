@@ -15,6 +15,8 @@ $ok = tlc_plugin_url('images/icons8-valid.png');
 $bad = tlc_plugin_url('images/icons8-invalid.png');
 $unknown = tlc_plugin_url('images/icons8-unknown.png');
 
+date_default_timezone_set($timezone);
+
 $api_key_is_good = false;
 if( empty($api_key) )
 {
@@ -250,7 +252,6 @@ There is currently no active livestream.
   $query = new UpcomingLivestreams($channel,$api_key);
   $upcoming_livestreams = $query->livestreams();
   uasort($upcoming_livestreams,ns('by_scheduled_start'));
-  date_default_timezone_set($timezone);
 ?>
 <h2>Upcoming Livestreams</h2>
 <table class='tlc-overview'>
@@ -300,8 +301,32 @@ There is currently no active livestream.
 There are currently no scheduled upcoming livestreams.
 <?php } ?>
 
-<?php if($api_key_is_good and $playlist_is_good) { ?>
+<?php if($api_key_is_good and $playlist_is_good) {
+  $query = new RecordedLivestreams($playlist,$api_key);
+  $latest_start = 0;
+  $last_recorded_livestream = null;
+  $recorded_livestreams = $query->livestreams();
+  foreach($recorded_livestreams as $id=>$r) {
+    if($r['actualStart'] > $latest_start) {
+      $latest_start = $r['actualStart'];
+      $last_recorded_livestream = $r;
+    }
+  }
+?>
 <h2>Most Current Recorded Video</h2>
+<?php if($last_recorded_livestream) {
+  $title = $last_recorded_livestream['title'];
+  $thumb = $last_recorded_livestream['thumbnail'];
+  $start = date('r',$last_recorded_livestream['actualStart']);
+?>
+<table class='tlc-overview'>
+<tr>
+  <td class=id><?=$start?></td>
+  <td class=value><?=$title?></td>
+  <td class=thumb><a href='https://youtube.com/watch?v=<?=$vid?>' target=_blank>
+    <img src='<?=$thumb?>'></img></a></td>
+</tr></table>
+<?php } else { ?>
+None Found
 <?php } ?>
-
-
+<?php } ?>

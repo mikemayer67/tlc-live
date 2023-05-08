@@ -159,7 +159,7 @@ $action = $_SERVER['SCRIPT_URI'].'?'.http_build_query(array(
       YouTube API queries are subject to a quota system, allowing only so many queries per day.
       If you are using the API key specified above for more than just this plugin, you may wish
       to reduce the query frequency to avoid hitting quota limitations.  Otherwise, the default
-      limit of no more than one query every 5 minutes should be sufficient to avoid quota issues.
+      limit of no more than one query every 10 minutes should be sufficient to avoid quota issues.
     </div>
     <div class=input>
       <input type='text' class='tls-time' name=<?=QUERY_FREQ?> value="<?=$query_freq?>" pattern='^\s*\d*\s*$'>

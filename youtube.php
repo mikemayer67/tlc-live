@@ -8,6 +8,7 @@ require_once tlc_plugin_path('include/http.php');
 require_once tlc_plugin_path('settings.php');
 
 const TRANSIENT_UPCOMING_KEY = 'tlc_livestream_upcoming';
+const TRANSIENT_RECORDED_KEY = 'tlc_livestream_recorded';
 
 class Query
 {
@@ -327,11 +328,11 @@ class UpcomingLivestreams extends YouTubeListQuery
     if(is_array($cache)) {
       if( $cache['channel'] == $channel_id) {
         $this->_livestreams = $cache['livestreams'];
-        log_info("Using cached livestream details");
+        log_info("Using cached upcoming livestream data");
         return;
       }
     }
-    log_info("Querying livestream details from YouTube API");
+    log_info("Querying upcoming livestream data from YouTube API");
 
     parent::__construct(
       "search",
@@ -378,7 +379,77 @@ class UpcomingLivestreams extends YouTubeListQuery
       ),
       $settings->get(QUERY_FREQ),
     );
-    log_info("Livestreams caching livestream data");
+    log_info("Caching upcoming livestream data");
 
+  }
+}
+
+class RecordedLivestreams extends YouTubeListQuery
+{
+  private $_livestreams;
+
+  public function livestreams() { return $this->_livestreams; }
+
+  public function __construct($playlist_id, $api_key)
+  {
+    $cache = get_transient(TRANSIENT_RECORDED_KEY);
+
+    if(is_array($cache)) {
+      if( $cache['playlist'] == $playlist_id ) {
+        $this->_livestreams = $cache['livestreams'];
+        log_info("Using cached recorded livestream data");
+        return;
+      }
+    }
+    log_info("Querying recorded livestream data from YouTube API");
+
+    parent::__construct(
+      "playlistItems",
+      array(
+        'part' => 'snippet',
+        'playlistId' => $playlist_id,
+        'fields' => 'items(snippet(title,thumbnails(default(url)),resourceId(videoId)))',
+        'key' => $api_key,
+      ),
+    );
+
+    $this->_livestreams = array();
+
+    if( $this->ok() ) {
+      foreach ($this->items() as &$item ) {
+        $id = $item['snippet']['resourceId']['videoId'];
+        $this->_livestreams[$id] = array(
+          "title" => $item['snippet']['title'],
+          "thumbnail" => $item['snippet']['thumbnails']['default']['url'] ?? "",
+        );
+      }
+      $query = new LivestreamDetails(array_keys($this->_livestreams),$api_key);
+      $details = $query->details();
+
+      foreach( $details as $id => $vd )
+      {
+        if( array_key_exists('actualStartTime',$vd) and array_key_exists('actualEndTime',$vd) )
+        {
+          $startTime = strtotime($vd['actualStartTime']);
+          $this->_livestreams[$id]['actualStart'] = $startTime;
+        }
+        else
+        {
+          unset($this->livestreams[$id]);
+        }
+      }
+    }
+
+    $settings = Settings::instance();
+
+    set_transient(
+      TRANSIENT_RECORDED_KEY,
+      array(
+        'playlist' => $playlist_id,
+        'livestreams' => $this->_livestreams,
+      ),
+      $settings->get(QUERY_FREQ),
+    );
+    log_info("Caching upcoming livestream data");
   }
 }

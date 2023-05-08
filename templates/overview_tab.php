@@ -257,12 +257,6 @@ if($api_key_is_good and $playlist_is_good) {
     <td class=label>modest branding</td>
     <td class=value><?=$modestbranding?></td>
   </tr>
-  <tr>
-    <td class=info colspan=2>
-      The transition from recorded to upcoming livestream will occur <b><?=$transition?></b>
-      the scheduled start time.
-    </td>
-  </tr>
 </table>
 
 
@@ -327,25 +321,40 @@ if($api_key_is_good and $playlist_is_good) {
 <h2>Summary</h2>
 
 <table class='tlc-overview'>
-<?php if(!$api_key_is_good) {?>
+<?php
+if( $api_key_is_good ) {
+  if( $channel_is_good ) {
+    if( $playlist_is_good ) { ?>
   <tr>
-    <td class=warning>
-      Without a validated API Key, the shortcode will not be able to function.
+    <td class=info colspan=2>
+      The transition from recorded to upcoming livestream will occur <b><?=$transition?></b>
+      the scheduled start time.
     </td>
   </tr>
-<?php } if(!$channel_is_good) {?>
+<?php     } else { // valid api_key, valid_channel, invalid playlist ?>
+  <tr><td class=warning>
+    Only live and upcoming livestreams will be shown.
+  </td></tr>
+  <tr><td class=info>
+    Add a valid playlist ID to show recorded livestreams between live broadcasts.
+  </td></tr>
+<?php     } // end-playlist?>
+<?php   } else { // valid api_key, invalid channel?>
   <tr>
     <td class=warning>
       Without a validated Channel ID, the shortcode will not be able to function.
     </td>
   </tr>
-<?php } if(!$playlist_is_good) {?>
+<?php   } // end-channel ?>
+<?php } else { // invalid api_key?>
   <tr>
     <td class=warning>
-      Without a validated Playlist ID, only live and upcoming livestreams will be shown.
+      Without a validated API Key, the shortcode will not be able to function.
     </td>
   </tr>
-<?php } ?>
+<?php } // end-api_key?>
+
+
 </table>
 
   

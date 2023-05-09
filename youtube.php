@@ -321,6 +321,16 @@ class UpcomingLivestreams extends YouTubeListQuery
 
   public function livestreams() { return $this->_livestreams; }
 
+  public function next_livestream() {
+    $rval = null;
+    foreach( $this->_livestreams as $id=>$details ) {
+      if(is_null($rval) or $details['scheduledStart'] < $rval['scheduledStart']) {
+        $rval = $details;
+      }
+    }
+    return $rval;
+  }
+
   public function __construct($channel_id, $api_key)
   {
     $cache = get_transient(TRANSIENT_UPCOMING_KEY);
@@ -352,6 +362,7 @@ class UpcomingLivestreams extends YouTubeListQuery
       foreach ($this->items() as &$item ) {
         $id = $item['id']['videoId'];
         $this->_livestreams[$id] = array(
+          "id" => $id,
           "title" => $item['snippet']['title'],
           "thumbnail" => $item['snippet']['thumbnails']['default']['url'] ?? "",
         );
@@ -390,6 +401,16 @@ class RecordedLivestreams extends YouTubeListQuery
 
   public function livestreams() { return $this->_livestreams; }
 
+  public function most_recent() {
+    $rval = null;
+    foreach( $this->_livestreams as $id=>$details ) {
+      if(is_null($rval) or $details['actualStart'] > $rval['actualStart']) {
+        $rval = $details;
+      }
+    }
+    return $rval;
+  }
+
   public function __construct($playlist_id, $api_key)
   {
     $cache = get_transient(TRANSIENT_RECORDED_KEY);
@@ -419,6 +440,7 @@ class RecordedLivestreams extends YouTubeListQuery
       foreach ($this->items() as &$item ) {
         $id = $item['snippet']['resourceId']['videoId'];
         $this->_livestreams[$id] = array(
+          "id" => $id,
           "title" => $item['snippet']['title'],
           "thumbnail" => $item['snippet']['thumbnails']['default']['url'] ?? "",
         );

@@ -165,13 +165,7 @@ if($api_key_is_good and $channel_is_good) {
 $latest_recorded_livestream = null;
 if($api_key_is_good and $playlist_is_good) {
   $query = new RecordedLivestreams($playlist,$api_key);
-  $latest_start = 0;
-  foreach($query->livestreams() as $id=>$r) {
-    if($r['actualStart'] > $latest_start) {
-      $latest_start = $r['actualStart'];
-      $latest_recorded_livestream = $r;
-    }
-  }
+  $latest_recorded_livestream = $query->most_recent();
 }
 
 ?>

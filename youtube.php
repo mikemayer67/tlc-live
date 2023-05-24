@@ -222,7 +222,7 @@ class YouTubeListQuery extends YouTubeQuery
 
   public function __construct($resource, $query_args)
   {
-    $query_args['maxResults'] = 2;
+    $query_args['maxResults'] = 50;
     $fields = $query_args['fields'] ?? "";
     $query_args['fields'] = "nextPageToken,$fields";
 
@@ -291,6 +291,7 @@ class LivestreamDetails extends YouTubeListQuery
       array(
         "part"=>"liveStreamingDetails",
         "id"=>$ids,
+        "maxWidth"=>1000,
         "fields"=>"items(id,liveStreamingDetails)",
         "key"=>$api_key,
       ),

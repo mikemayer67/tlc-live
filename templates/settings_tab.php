@@ -60,7 +60,7 @@ $timezones = \DateTimeZone::listIdentifiers();
       <a href='https://youtube.com/account_advanced' target='_blank' rel='noopener noreferrer'>advanced YouTube account settings</a>.
     </div>
     <div class=input>
-      <input type="text" name=<?=CHANNEL_ID?> value="<?=$channel?>" pattern='^[a-zA-Z0-9_]*$'>
+      <input type="text" name=<?=CHANNEL_ID?> value="<?=$channel?>" pattern='^[a-zA-Z0-9_-]*$'>
     </div>
     <div class=label>Playlist ID</div>
     <div  class=info>
@@ -86,7 +86,7 @@ $timezones = \DateTimeZone::listIdentifiers();
       </ul>
 -->
     <div class=input>
-      <td><input type="text" name=<?=PLAYLIST_ID?> value="<?=$playlist?>" pattern='^[a-zA-Z0-9_]*$'></td>
+      <td><input type="text" name=<?=PLAYLIST_ID?> value="<?=$playlist?>" pattern='^[a-zA-Z0-9_-]*$'></td>
     </div>
     <div class=label>Transition To Upcoming Livestream</div>
     <div class=info>

@@ -65,35 +65,61 @@ function handle_shortcode($attr,$content=null,$tag=null)
       FULL_SCREEN => $settings->get(FULL_SCREEN),
       MODEST_BRANDING => $settings->get(MODEST_BRANDING),
       TRANSITION => $settings->get(TRANSITION),
+      'width' => '100%',
     ),
     $attr,
   );
 
+  foreach( array(AUTOPLAY,CONTROLS,ENABLE_KB,FULL_SCREEN,MODEST_BRANDING) as $key )
+  {
+    if( !$attr[$key] ) { $attr[$key] = 0; }
+  }
+  
+  $width = $attr['width'];
+  $width_components = array();
+  if(preg_match('/^([\d.]+)\s*(\S*)$/',$width,$width_components)) {
+    $height = strval(0.5625*$width_components[1]) . $width_components[2];
+  } else {
+    $width = '100%';
+    $height = '56.25%';
+  }
+
+  $tag = null;
+  $is_upcoming = false;
+  $is_live = false;
   if( $next_livestream and $prev_recorded )
   {
     $transition = $next_livestream['scheduledStart'] - $attr[TRANSITION];
-    return '<div>' . print_r($attr,true) . "</div><div>$content</div>" . 
-      "<div>" . print_r($next_livestream,true) . "</div><div>" .
-      print_r($prev_recorded,true)."</div><div>Now=$now</div>" .
-      "<div>Transition=$transition</div>";
+    $id = ($now >= $transition) ? $next_livestream['id'] : $prev_recorded['id'];
   }
   elseif( $next_livestream )
   {
-    return '<div>' . print_r($attr,true) . "</div><div>$content</div>" . 
-      "<div>" . print_r($next_livestream,true) . "</div>";
+    $id = $next_livestream['id'];
   }
   elseif( $prev_recorded )
   {
-    return '<div>' . print_r($attr,true) . "</div><div>$content</div>" . 
-      "<div>" . print_r($prev_recorded,true) . "</div>";
+    $id = $prev_recorded['id'];
   }
   else
   {
     return "<span class='tlc-warning'>No upcoming or recorded livestreams found." .
       "  Contact your site administrator.";
   }
-  
 
+  $html = "";
+  $html .= "<div class='tlc-yt-container' style='width:$width; padding-top:$height;'>"; 
+  $html .= "<iframe class='tlc-yt-embed' type='text/html'";
+  $html .= " src='https://www.youtube.com/embed/$id?";
+  $html .= "autoplay=".$attr[AUTOPLAY];
+  $html .= "&controls=".$attr[CONTROLS];
+  $html .= "&disablekb=".strval(1-$attr[CONTROLS]);
+  $html .= "&fs=".$attr[FULL_SCREEN];
+  $html .= "&modestbranding=".$attr[MODEST_BRANDING];
+  $html .= "'>";
+  $html .= "</iframe>";
+  $html .= "</div>";
+
+  return $html;
 }
 
 add_shortcode('tlc-livestream', ns('handle_shortcode'));

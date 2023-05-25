@@ -39,7 +39,6 @@ function tlc_plugin_path($rel_path)
 /**
  * return absolute path to the plugin file
  * 
- * @param path relative to plugin directory
  * @return absolute path to plugin file
  */
 function tlc_plugin_file()

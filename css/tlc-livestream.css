@@ -119,3 +119,40 @@ form.tlc-overview span.input-label {
 }
 
 
+.tlc-shortcode-info {
+  margin-top:10px;
+  font-weight:bolder;
+}
+
+.tlc-shortcode-note {
+  margin-left:15px;
+  font-weight:400;
+  font-style:italic;
+}
+
+.tlc-shortcode-args {
+  margin-left:15px;
+}
+
+.tlc-shortcode-arg {
+  font-weight:bolder;
+  margin-top:10px;
+}
+
+.tlc-shortcode-arg-info {
+  margin-left:15px;
+  font-weight:400;
+}
+
+.tlc-shortcode-example {
+  font-family: monospace;
+  font-weight: bolder;
+  font-size: medium;
+  margin-left: 15px;
+  padding: 10px;
+  color: black;
+  background: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+}

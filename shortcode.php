@@ -23,6 +23,13 @@ require_once tlc_plugin_path('youtube.php');
 
 function handle_shortcode($attr,$content=null,$tag=null)
 {
+  static $first = true;
+  if(!$first) {
+    return;
+  } else {
+    $first = false;
+  }
+
   wp_enqueue_style('tlc-livestream-shortcode', tlc_plugin_url('css/tlc-livestream-shortcode.css'));
 
   $settings = Settings::instance();

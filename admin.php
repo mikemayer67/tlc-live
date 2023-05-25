@@ -37,9 +37,22 @@ function handle_admin_menu()
     
 }
 
+function add_settings_link($links)
+{
+  $options_url = admin_url('options-general.php');
+  $options_url .= "?page=".SETTINGS_PAGE_SLUG;
+  $settings_url = $options_url . "&tab=settings";
+  $overview_url = $options_url . "&tab=overview";
+  log_info("Options URL: $options_url");
+  array_unshift($links,"<a href='$settings_url'>Settings</a>");
+  array_unshift($links,"<a href='$overview_url'>Overview</a>");
+  return $links;
+}
+
 add_action('admin_menu', ns('handle_admin_menu'));
 #add_action('admin_init', ns('handle_admin_init'));
 add_action('init',       ns('handle_init'));
+add_action('plugin_action_links_'.plugin_basename(tlc_plugin_file()),ns('add_settings_link'));
 
 
 /**

@@ -14,15 +14,22 @@ $enablekb = $settings->get(ENABLE_KB);
 $fullscreen = $settings->get(FULL_SCREEN);
 $modestbranding = $settings->get(MODEST_BRANDING);
 $transition = $settings->get(TRANSITION);
+$abandon = $settings->get(ABANDON);
 $query_freq = $settings->get(QUERY_FREQ);
 $timezone = $settings->get(TIMEZONE);
 
-// transition frequency is enterred in days, hours, minutes
-$transition = floor($transition/60);
+// transition time is enterred in days, hours, minutes
 $transition_m = $transition % 60;
 $transition   = ($transition - $transition_m) / 60;
 $transition_h = $transition % 24;
 $transition_d = ($transition - $transition_h) / 24;
+
+// abandon time is enterred in days, hours, minutes
+$abandon_m = $abandon % 60;
+$abandon   = ($abandon - $abandon_m) / 60;
+$abandon_h = $abandon % 24;
+$abandon_d = ($abandon - $abandon_h) / 24;
+
 // query is enterred in minutes
 $query_freq = floor($query_freq/60);
 
@@ -41,6 +48,7 @@ $timezones = \DateTimeZone::listIdentifiers();
   <input type="hidden" name="action" value="update">
   <?=$nonce?>
   <div class=tlc>
+
     <div class=label>YouTube API Key</div>
     <div class='info'>
       The YouTube API key is used to query your YouTube channel and to examine your playlist
@@ -50,6 +58,7 @@ $timezones = \DateTimeZone::listIdentifiers();
     <div class=input>
       <input type="text" class=tlc name=<?=API_KEY?> value="<?=$api_key?>" pattern='^[a-zA-Z0-9_]*$'>
     </div>
+
     <div class=label>Channel ID</div>
     <div class=info>
       The YouTube channel ID is used to look for your active and upcoming livestreams.  If the channel ID is not set or
@@ -62,6 +71,7 @@ $timezones = \DateTimeZone::listIdentifiers();
     <div class=input>
       <input type="text" name=<?=CHANNEL_ID?> value="<?=$channel?>" pattern='^[a-zA-Z0-9_-]*$'>
     </div>
+
     <div class=label>Playlist ID</div>
     <div  class=info>
       The Playlist ID is used to determine what to show when there is not an active livestream and it
@@ -88,9 +98,10 @@ $timezones = \DateTimeZone::listIdentifiers();
     <div class=input>
       <td><input type="text" name=<?=PLAYLIST_ID?> value="<?=$playlist?>" pattern='^[a-zA-Z0-9_-]*$'></td>
     </div>
+
     <div class=label>Transition To Upcoming Livestream</div>
     <div class=info>
-      The transition setting determines how far in advance of an upcoming livestream
+      This setting determines how far in advance of an upcoming livestream
       your website will switch from embedding the most recently recorded livestream
       to embedding the upcoming livestream.  If left blank, the transition will occur
       at the scheduled start time.
@@ -107,6 +118,7 @@ $timezones = \DateTimeZone::listIdentifiers();
       This transition will happen automatically if Javascript is enabled. Otherwise, the page
       will need to be manually refreshed to see the transition.
     </div>
+
     <div class=label>Embedded Livestream Options</div>
     <div class=info>
       There are a number of options that can be configured when embedding a YouTube video within
@@ -157,6 +169,27 @@ $timezones = \DateTimeZone::listIdentifiers();
         </li>
       </ul>
     </div>
+
+    <div class=label>Abandon Overdue Livestreams</div>
+    <div class=info>
+      This setting determines how long after the scheduled start time for a livestream that
+      it is considered to be "dead."  A "dead" upcoming livestream will not be considered when
+      determining whether to show an upcoming or recorded livestream.  If left blank, a livestream
+      will be considered dead 1 hour after the scheduled start time.
+    </div>
+    <div class=input>
+      <input type='text' class='tls-time' name='abandon_d' value="<?=$abandon_d?>" pattern='^\s*\d*\s*$'>
+      days
+      <input type='text' class='tls-time' name='abandon_h' value="<?=$abandon_h?>" pattern='^\s*\d*\s*$'>
+      hours
+      <input type='text' class='tls-time' name='abandon_m' value="<?=$abandon_m?>" pattern='^\s*\d*\s*$'>
+      minutes
+    </div>
+    <div class=info style='padding-top:10px;'>
+      This abandoning of dead livestreams will happen automatically if Javascript is enabled. Otherwise, 
+      the page will need to be manually refreshed to return to the last recorded livestream.
+    </div>
+
     <div class=label>YouTube Query Frequency</div>
     <div class=info>
       YouTube API queries are subject to a quota system, allowing only so many queries per day.
@@ -168,6 +201,7 @@ $timezones = \DateTimeZone::listIdentifiers();
       <input type='text' class='tls-time' name=<?=QUERY_FREQ?> value="<?=$query_freq?>" pattern='^\s*\d*\s*$'>
       minutes
     </div>
+
     <div class=label>Local Timezone</div>
     <div class=info>
       This is only used in the overview tab in the settings page for this plugin. 

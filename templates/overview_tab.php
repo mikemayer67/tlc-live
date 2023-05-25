@@ -110,7 +110,7 @@ $modestbranding = ($settings->get(MODEST_BRANDING)
 
 // Transition
 
-$transition = floor($settings->get(TRANSITION)/60);
+$transition = $settings->get(TRANSITION);
 $transition_m = $transition % 60;
 $transition   = ($transition - $transition_m) / 60;
 $transition_h = $transition % 24;
@@ -137,6 +137,34 @@ if( empty($transition) ) {
   $transition = "at";
 } else {
   $transition = "$transition before";
+}
+
+// ABANDON
+
+$abandon = $settings->get(ABANDON);
+if( $abandon == 0 ) {
+  $abandon = 3600;
+}
+$abandon_m = $abandon % 60;
+$abandon   = ($abandon - $abandon_m) / 60;
+$abandon_h = $abandon % 24;
+$abandon_d = ($abandon - $abandon_h) / 24;
+
+$abandon = "";
+switch($abandon_d) {
+case 0:  $abandon = "";                   break;
+case 1:  $abandon = "1 day";              break;
+default: $abandon = "$abandon_d days"; break;
+}
+switch($abandon_h) {
+case 0:                                        break;
+case 1:  $abandon .= " 1 hour";              break;
+default: $abandon .= " $abandon_h hours"; break;
+}
+switch($abandon_m) {
+case 0:                                          break;
+case 1:  $abandon .= " 1 minute";              break;
+default: $abandon .= " $abandon_m minutes"; break;
 }
 
 // Playlists
@@ -333,6 +361,12 @@ if( $api_key_is_good ) {
     Add a valid playlist ID to show recorded livestreams between live broadcasts.
   </td></tr>
 <?php     } // end-playlist?>
+  <tr>
+    <td class=info colspan=2>
+      Upcoming livestreams will be considered "dead" <b><?=$abandon?></b>
+      after the scheduled start time.
+    </td>
+  </tr>
 <?php   } else { // valid api_key, invalid channel?>
   <tr>
     <td class=warning>

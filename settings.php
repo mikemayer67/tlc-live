@@ -29,7 +29,8 @@ const CONTROLS = 'controls';
 const ENABLE_KB = 'enablekb';
 const FULL_SCREEN = 'fullscreen';
 const MODEST_BRANDING = 'modestbranding';
-const TRANSITION = 'transition';
+const TRANSITION = 'transition';  # minutes
+const ABANDON = 'abandon'; # minutes 
 const QUERY_FREQ = 'query_freq';
 const TIMEZONE = 'timezone';
 
@@ -43,7 +44,8 @@ const OPTION_DEFAULTS = [
   FULL_SCREEN => true,
   QUERY_FREQ => 600,
   MODEST_BRANDING => true,
-  TRANSITION => 1800,
+  TRANSITION => 30,
+  ABANDON => 60,
   TIMEZONE => 'America/New_York',
 ];
 

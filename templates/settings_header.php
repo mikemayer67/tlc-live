@@ -42,11 +42,21 @@ if(($_POST['action'] ?? null) == "update") {
   $settings->set(MODEST_BRANDING,$modestbranding);
 
   $transition = (
-    60 * ( (int)($_POST['transition_m']) +
+    (int)($_POST['transition_m']) +
     60 * ( (int)($_POST['transition_h']) +
-    24 * ( (int)($_POST['transition_d']) ) ) )
+    24 * ( (int)($_POST['transition_d']) ) )
   );
   $settings->set(TRANSITION,$transition);
+
+  $abandon = (
+    (int)($_POST['abandon_m']) +
+    60 * ( (int)($_POST['abandon_h']) +
+    24 * ( (int)($_POST['abandon_d']) ) )
+  );
+  if($abandon==0) {
+    $abandon = $OPTION_DEFAULTS[ABANDON];
+  }
+  $settings->set(ABANDON,$abandon);
 
   $query_freq = 60 * (int)($_POST[QUERY_FREQ]);
   if( $query_freq == 0 ) { $query_freq = 300; }

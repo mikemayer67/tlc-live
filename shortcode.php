@@ -72,6 +72,7 @@ function handle_shortcode($attr,$content=null,$tag=null)
       FULL_SCREEN => $settings->get(FULL_SCREEN),
       MODEST_BRANDING => $settings->get(MODEST_BRANDING),
       TRANSITION => $settings->get(TRANSITION),
+      ABANDON => $settings->get(ABANDON),
       'width' => '100%',
     ),
     $attr,
@@ -96,7 +97,7 @@ function handle_shortcode($attr,$content=null,$tag=null)
   $is_live = false;
   if( $next_livestream and $prev_recorded )
   {
-    $transition = $next_livestream['scheduledStart'] - $attr[TRANSITION];
+    $transition = $next_livestream['scheduledStart'] - 60*$attr[TRANSITION];
     $id = ($now >= $transition) ? $next_livestream['id'] : $prev_recorded['id'];
   }
   elseif( $next_livestream )

@@ -33,8 +33,13 @@ Any unpecified argument defaults to the value defined in the plugin settings
 <div class=tlc-shortcode-arg-info> 1: the YouTube logo will be suppressed unless livestream is paused</div>
 <div class=tlc-shortcode-arg>transition</div>
 <div class=tlc-shortcode-arg-info> 
-The number of <b>seconds</b> before the scheduled start that the player will switch from showing the 
+The number of <b>minutes</b> before the scheduled start that the player will switch from showing the 
 previously recorded livestream to the upcoming livestream.
+</div>
+<div class=tlc-shortcode-arg>abandon</div>
+<div class=tlc-shortcode-arg-info> 
+The number of <b>minutes</b> after the scheduled start that a livestream will be considered "dead"
+if it has not started streaming.
 </div>
 <div class=tlc-shortcode-arg>width</div>
 <div class=tlc-shortcode-arg-info> 
@@ -47,5 +52,5 @@ The height of the player is set using the width and the standard 16:9 YouTube as
 
 <h3>Example</h3>
 <div><span class=tlc-shortcode-example>
-[tlc-livestream fullscreen=1 transition=180 width=75%]
+[tlc-livestream fullscreen=1 transition=3 width=75%]
 </span></div>
